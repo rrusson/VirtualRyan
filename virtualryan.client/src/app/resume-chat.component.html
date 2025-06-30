@@ -1,0 +1,16 @@
+<h2>Resume Chat</h2>
+<form (ngSubmit)="submitQuestion()" style="margin-bottom:2rem;">
+  <textarea [(ngModel)]="chatQuestion" name="chatQuestion" rows="8" cols="80" placeholder="Ask a question about Ryan's resume..."></textarea>
+  <br>
+  <button type="submit" [disabled]="loading || !chatQuestion.trim()" class="logo">Submit</button>
+</form>
+
+@if (loading) {
+<div><em>Loading response...</em></div>
+}
+
+@if (chatResponse && !loading) {
+<div class="response">
+  {{ chatResponse }}
+</div>
+}

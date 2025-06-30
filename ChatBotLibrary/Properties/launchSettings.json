@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "VectorDataAI": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "GITHUB_TOKEN": "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"
+      },
+      "hotReloadEnabled": false
+    }
+  }
+}

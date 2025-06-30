@@ -1,0 +1,208 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+/* Modern background gradient */
+body {
+  background: linear-gradient(135deg, #23272f 0%, #3a4052 100%);
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.vanilla:hover {
+  filter: drop-shadow(0 0 2em #3178c6aa);
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+/* Sleek nav bar */
+nav {
+  background: rgba(36, 36, 36, 0.95);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  margin: 2rem auto 1.5rem auto;
+  padding: 0.75rem 2rem;
+  max-width: 420px;
+  transition: box-shadow 0.2s;
+}
+nav a {
+  color: #90caf9;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+nav a:hover {
+  color: #fff;
+  text-shadow: 0 2px 8px #646cff55;
+}
+
+/* Main app-root card styling */
+app-root {
+  display: block;
+  background: rgba(255,255,255,0.04);
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+  padding: 2.5rem 2rem;
+  max-width: 700px;
+  margin: 0 auto 2rem auto;
+  transition: box-shadow 0.2s;
+}
+
+/* Headings and text */
+h1, h2, h3, h4, h5, h6 {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.5em;
+}
+h1 {
+  font-size: 2.6em;
+}
+p, li {
+  color: #e0e0e0;
+  font-size: 1.08em;
+  line-height: 1.7;
+}
+
+/* Horizontal top menu styles */
+.top-menu {
+  width: 100%;
+  background: #23272f;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 0;
+}
+.top-menu ul {
+  display: flex;
+  margin: 0;
+  padding: 0 2rem;
+  list-style: none;
+  height: 56px;
+  align-items: center;
+}
+.top-menu li {
+  margin: 0 1.5rem 0 0;
+}
+.top-menu li:last-child {
+  margin-right: 0;
+}
+.top-menu a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+.top-menu a:hover {
+  background: #3a4052;
+  color: #90caf9;
+}
+#main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+#main-layout > header {
+  flex-shrink: 0;
+}
+#main-layout > main {
+  flex: 1 1 auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 800px) {
+  app-root {
+    padding: 1.2rem 0.5rem;
+    max-width: 98vw;
+  }
+  nav {
+    max-width: 98vw;
+    padding: 0.5rem 1rem;
+  }
+}

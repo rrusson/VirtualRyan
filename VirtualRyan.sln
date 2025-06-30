@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36221.1 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "virtualryan.client", "virtualryan.client\virtualryan.client.esproj", "{AC8FD9A3-CA5A-0577-16E3-F61F0FC9A7BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualRyan.Server", "VirtualRyan.Server\VirtualRyan.Server.csproj", "{7DD79AFB-4986-4764-80E3-C4E5E5D8C465}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatBotLibrary", "ChatBotLibrary\ChatBotLibrary.csproj", "{ACAA43A4-15AF-6D42-6D2A-B465F4028F3E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC8FD9A3-CA5A-0577-16E3-F61F0FC9A7BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC8FD9A3-CA5A-0577-16E3-F61F0FC9A7BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC8FD9A3-CA5A-0577-16E3-F61F0FC9A7BB}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{AC8FD9A3-CA5A-0577-16E3-F61F0FC9A7BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC8FD9A3-CA5A-0577-16E3-F61F0FC9A7BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC8FD9A3-CA5A-0577-16E3-F61F0FC9A7BB}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{7DD79AFB-4986-4764-80E3-C4E5E5D8C465}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DD79AFB-4986-4764-80E3-C4E5E5D8C465}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DD79AFB-4986-4764-80E3-C4E5E5D8C465}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DD79AFB-4986-4764-80E3-C4E5E5D8C465}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACAA43A4-15AF-6D42-6D2A-B465F4028F3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACAA43A4-15AF-6D42-6D2A-B465F4028F3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACAA43A4-15AF-6D42-6D2A-B465F4028F3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACAA43A4-15AF-6D42-6D2A-B465F4028F3E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F229E852-4CA8-438F-8EF4-B78EE9B1D7DD}
+	EndGlobalSection
+EndGlobal

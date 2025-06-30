@@ -1,0 +1,6 @@
+@VirtualRyan.Server_HostAddress = http://localhost:5069
+
+GET {{VirtualRyan.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

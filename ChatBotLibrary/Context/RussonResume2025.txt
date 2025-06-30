@@ -1,0 +1,87 @@
+RYAN RUSSON
+937 NW 83rd Dr.	Coral Springs, FL	33071
+(954) 304-3023	it@rrusson.com
+
+
+PROGRAMMING & SOFTWARE SKILLS:
+C# 13/ .NET 9/ .NET Core	JavaScript/ jQuery/ TypeScript	ASP.NET/ MVC/ MVVM
+REST/ SOAP/ Web API	HTML/ CSS/ XML/ XAML	Xamarin Forms/ .NET MAUI
+OOP/ IoC/ Dependency Injection	SAST/ OWASP Standards	SOLID/ GoF Design Patterns
+LLM Integration/ Ollama/ MCP	TDD/ Unit Tests/ Postman Tests	AWS/ S3/ SNS/ SQS
+MS SQL Server/ NoSQL DBs	T-SQL/ Database Optimization	LINQ/ Entity Framework
+
+
+OTHER PROFESSIONAL SKILLS:
+Project Planning & Analysis	Application Architecture & Design	Source Control Admin.
+Process Improvement	Basic Spanish Fluency		CI/CD Automation/ DevOps
+Code & Data Best Practices	Scrum/ Agile/ Kanban		Technical Documentation
+
+
+WORK EXPERIENCE:
+Software Developer III	MobileHelp/Medical Guardian, Boca Raton, FL	02/2017 – 06/2025
+https://www.mobilehelp.com
+* Developed and maintained web applications, APIs, and utilities using C#, MVC, Asp.NET, jQuery, JSON, Bootstrap, Web API, SQL, VS 2022, VS Code, Autofac (DI library), MOQ (mocking library), Git, and other technologies
+* Lead monthly group on best practices, unit testing, optimization, coding standards, and SOLID design principles
+* Set up automation for GitHub, Sonar code linting, Dependabot, Jira, Bamboo (builds/deployment), and testing
+* Created and integrated AWS message queues (SQS), subscriptions (SNS), S3 storage, and other services
+* Integrated third party services (e.g. Pitney-Bowes, Twilio, Velocify, WhitePages, etc.) with web/console applications
+* Screened, interviewed, tested, and evaluated applicants for senior-level programming positions
+* Created complex ETL jobs with SQL Server, custom apps, and service integrations to manage customer data
+* Extensive refactoring of C#, SQL, UI, and JavaScript to promote better reuse, maintenance, and optimization
+* Created microservices using .NET Web API, OpenAPI, and AWS Lambdas written in TypeScript
+
+Sr. Software Engineer	PAR Technologies, Boca Raton, FL	08/2015 – 02/2017
+https://www.partech.com
+* Developed features for flagship mobile application, using Xamarin Forms with C#, VS 2013, TFS, MVVM Cross, SQLite, MOQ, MS Intellitest, MS unit tests, and other tools/technologies
+* Designed concurrent, thread-safe systems, using async/await and other patterns
+* Created proof-of-concept app using Typescript, Sails, Ionic2, Angular2, Node.js, Gulp, and MongoDB
+* Conducted screenings and interviews for senior-level developers and outsourced contractors
+
+Contract Developer	SRT Wireless (now Bluehalo), Davie, FL	04/2015 – 08/2015
+https://www.srtwireless.net
+* Worked on backend and middle tiers for highly distributed, multi-threaded WPF applications, using sockets to communicate with 802.11-based wireless hardware
+* Designed and implemented robust state machine for handling all potential operational conditions and changes
+* Created unit tests for all new classes using MOQ with VS test projects and created simple performance tests
+* Created class diagrams, state diagrams, test plans, and other project artifacts
+
+Sr. Software Developer	Fleet Advantage, Fort Lauderdale, FL	03/2013 – 04/2015
+https://www.fleetadvantage.net
+* Developed REST-based web services using Web API and consuming REST, SOAP, and WCF web services using .NET proxies, XML deserialization, and JSON.net
+* Created and maintained utility apps and complex ETL pipelines using C#, Entity Framework, LINQ, SQL, VS 2013, AutoMapper, JSON.net, SSIS, SignalR, screen scraping, FTP, and web service integrations
+* Migrated business data from MS Access to SQL Server and re-architected data into third normal form
+
+Lead Developer	Liberty Power Corp., Fort Lauderdale, FL	12/2010 – 03/2013
+https://www.libertypowercorp.com
+* Architected, developed, and maintained web applications using C#, AJAX patterns, ASP.NET, Entity Framework, jQuery, LINQ, T4 templates, TFS 2010, T-SQL, VS2012, and WCF
+* Created extensible event logging and processing service, customized to business needs, using OO patterns
+* Coordinated, mentored, evangelized, and delivered training in current Microsoft technologies and best practices
+* Provided ALM process guidance, training, and assistance in migration to TFS/VS 2012
+
+Software Engineer III	Kaplan Higher Education, Fort Lauderdale, FL	11/2008 – 12/2010
+https://www.kaplan.com
+* Developed software and database structure/integration for a podcast CMS, a social networking portal, and other complex web portal features used by tens of thousands of Kaplan customers
+* Conducted frequent technical interviews, phone screens, and evaluation of senior programming talent
+* Architected, created technical specifications, developed, and upgraded web applications using C#, AJAX, MVC 1.0, ASP.NET, jQuery, LINQ to SQL, T-SQL, WCF, CodeSmith, VSTS 2008, and related technologies
+
+Lead Developer/Manager	Mutual Service Corp., West Palm Beach, FL	06/2007 – 11/2008
+https://www.mutualservice.com
+* Prioritized, delegated tasks, assisted, mentored, managed, and lead a team of four developers
+* Designed, developed, performed troubleshooting, and upgraded web and desktop applications using AJAX, ASP.NET, C#, JavaScript, XML, XSL, HTML, CSS, SQL, SSIS, and associated technologies
+* Supported and maintained existing applications; upgraded same to current development standards
+* Trained IT staff in object-oriented programming, coding best practices, and emerging technologies
+
+Sr. Developer	Learn.com (now Oracle Learn Cloud), Sunrise, FL	10/2005 – 06/2007
+https://www.learn.com
+* Developed and maintained C# webforms application for a large, high-availability LMS/CMS system
+* Performed troubleshooting, maintenance, and upgrading of classic ASP and SQL legacy codebase
+
+Developer	Office Depot Inc., Delray Beach, FL	11/2004 – 10/2005
+https://www.officedepot.com
+* Architected, created, and redesigned databases and web apps to support accounting and financial systems
+* Created and performance tuned complex T-SQL stored procedures, DTS packages, views, triggers, etc.
+
+
+EDUCATION:
+MS - Management Information Systems		U. of South Florida, Tampa, FL
+MA - Psychology		U. of South Florida, Tampa, FL
+BS - Cum Laude, Psychology		U. of Washington, Seattle, WA
