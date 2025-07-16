@@ -1,11 +1,11 @@
-RYAN RUSSON
+Ryan Russon
 937 NW 83rd Dr.	Coral Springs, FL	33071
 (954) 304-3023	it@rrusson.com
 
 
 PROGRAMMING & SOFTWARE SKILLS:
 C# 13/ .NET 9/ .NET Core	JavaScript/ jQuery/ TypeScript	ASP.NET/ MVC/ MVVM
-REST/ SOAP/ Web API	HTML/ CSS/ XML/ XAML	Xamarin Forms/ .NET MAUI
+REST/ SOAP/ WCF/ Web API	HTML/ CSS/ XML/ XAML	Xamarin Forms/ .NET MAUI
 OOP/ IoC/ Dependency Injection	SAST/ OWASP Standards	SOLID/ GoF Design Patterns
 LLM Integration/ Ollama/ MCP	TDD/ Unit Tests/ Postman Tests	AWS/ S3/ SNS/ SQS
 MS SQL Server/ NoSQL DBs	T-SQL/ Database Optimization	LINQ/ Entity Framework
@@ -82,6 +82,6 @@ https://www.officedepot.com
 
 
 EDUCATION:
-MS - Management Information Systems		U. of South Florida, Tampa, FL
-MA - Psychology		U. of South Florida, Tampa, FL
-BS - Cum Laude, Psychology		U. of Washington, Seattle, WA
+MS - Management Information Systems		2002	U. of South Florida, Tampa, FL
+MA - Psychology		2003	U. of South Florida, Tampa, FL
+BS - Cum Laude, Psychology		1992	U. of Washington, Seattle, WA

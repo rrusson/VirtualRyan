@@ -16,24 +16,7 @@ namespace ChatBotLibrary
 			string model = "openai/gpt-4.1";
 
 			var client = new ChatCompletionsClient(endpoint, credential, new ChatCompletionsClientOptions());
-
-			// Add a system role message before the user message
-			var systemMsg = new ChatRequestSystemMessage("You are Ryan Russon, a senior Microsoft full-stack software developer seeking employment. Answer questions based on the included resume and background information.");
-			var resume = new ChatRequestSystemMessage(TextFileReader.ReadTextFile("RussonResume2025.txt"));
-			var coverStuff = new ChatRequestSystemMessage(TextFileReader.ReadTextFile("RyanCoverLetterFodder.txt"));
-
-			// ??? Should we include previous questions and answers ??? Or just the current question (will the bot re-answer?).
-			var userMsg = new ChatRequestUserMessage(string.Join(" ", messages));
-
-			// Add messages to the request options
-			var requestOptions = new ChatCompletionsOptions()
-			{
-				Messages = { systemMsg, resume, coverStuff, userMsg },
-				Temperature = 1.0f,
-				NucleusSamplingFactor = 1.0f,
-				MaxTokens = 1000,
-				Model = model
-			};
+			ChatCompletionsOptions requestOptions = GetResumeChatOptions(messages, model);
 
 			var responseText = new StringBuilder(6000);
 			StreamingResponse<StreamingChatCompletionsUpdate> response = await client.CompleteStreamingAsync(requestOptions).ConfigureAwait(false);
@@ -48,6 +31,41 @@ namespace ChatBotLibrary
 			}
 
 			return responseText.ToString();
+		}
+
+		private static ChatCompletionsOptions GetResumeChatOptions(string[] messages, string model)
+		{
+			// Add a system role message before the user message
+			var systemMsg = new ChatRequestSystemMessage(@"Answer questions about Ryan Russon, a senior full-stack .NET software developer seeking employment.
+				Answer questions based on the included resume and background information context.
+				Be succinct, without extra phrasing like 'based off his resume...',
+				if asked about a missing skill mention he's experimented with most technologies and a quick learner, 
+				and emphasize his strong work ethic and reliability when apropos.");
+
+			string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+			string contextFolderPath = Path.Combine(baseDirectory, "Context");
+			string[] contextFiles = TextFileReader.ReadAllTextFiles(contextFolderPath);
+			var contextMessages = contextFiles.Select(fileContent => new ChatRequestSystemMessage(fileContent));
+
+			// ??? Should we include previous questions and answers ??? Or just the current question (will the bot re-answer?).
+			var userMsg = new ChatRequestUserMessage(string.Join(" ", messages));
+
+			List<ChatRequestMessage> combinedMessages = new() { systemMsg };
+			combinedMessages.AddRange(contextMessages);
+			combinedMessages.Add(userMsg);
+
+			// Add messages to the request options
+			var requestOptions = new ChatCompletionsOptions()
+			{
+				Temperature = 1.0f,
+				NucleusSamplingFactor = 1.0f,
+				MaxTokens = 1000,
+				Model = model
+			};
+
+			combinedMessages.ForEach(msg => requestOptions.Messages.Add(msg));
+
+			return requestOptions;
 		}
 	}
 }

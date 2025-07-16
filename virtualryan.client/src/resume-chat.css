@@ -1,0 +1,63 @@
+.chatQuestion {
+    color: darkblue;
+    padding: 2px;
+}
+
+
+button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+    button:hover {
+        border-color: #646cff;
+        /*box-shadow:*/
+    }
+
+    button:focus,
+    button:focus-visible {
+        outline: 4px auto -webkit-focus-ring-color;
+    }
+
+.response {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: black;
+    text-align: left;
+    background-color: #f9f9f9;
+    white-space: pre-wrap;
+}
+
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #646cff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-container {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 1rem;
+    font-style: italic;
+}

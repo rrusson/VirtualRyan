@@ -1,24 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ChatBotLibrary
+﻿namespace ChatBotLibrary
 {
 	internal class TextFileReader
 	{
-		internal static string ReadTextFile(string fileName)
+		internal static string[] ReadAllTextFiles(string directoryPath)
 		{
-			ArgumentNullException.ThrowIfNull(fileName, nameof(fileName));
+			ArgumentNullException.ThrowIfNull(directoryPath, nameof(directoryPath));
 
-			string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-			string contextFolderPath = Path.Combine(baseDirectory, "Context");
-			string filePath = Path.Combine(contextFolderPath, fileName);
+			if (!Directory.Exists(directoryPath))
+			{
+				throw new DirectoryNotFoundException($"The directory '{directoryPath}' does not exist.");
+			}
+
+			return [.. Directory.GetFiles(directoryPath, "*.txt").Select(file => ReadTextFile(file))];
+		}
+
+
+		internal static string ReadTextFile(string filePath)
+		{
+			ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
 
 			try
 			{
-				return File.ReadAllText(filePath);
+				string fileName = Path.GetFileName(filePath);
+				return $"**FROM FILE {fileName}:** " + File.ReadAllText(filePath);
 			}
 			catch (IOException ex)
 			{
