@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import child_process from 'child_process';
 import { env } from 'process';
+import copy from 'rollup-plugin-copy';
 
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''
@@ -39,7 +40,16 @@ const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_H
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [plugin()],
+    plugins: [
+        plugin(),
+        copy({
+            targets: [
+                { src: 'css/*', dest: 'dist/css' },
+                { src: 'scripts/*', dest: 'dist/scripts' }
+            ],
+            hook: 'writeBundle'
+        })
+    ],
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -61,5 +71,6 @@ export default defineConfig({
             key: fs.readFileSync(keyFilePath),
             cert: fs.readFileSync(certFilePath),
         }
-    }
+    },
+    publicDir: 'public'
 })

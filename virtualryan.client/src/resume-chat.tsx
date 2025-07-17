@@ -1,11 +1,37 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './resume-chat.css';
+
+// Type definitions for jQuery and global functions
+interface WindowWithJQuery extends Window {
+    $?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    insertUserMessage?: (message: string) => void;
+    addBotResponse?: (response: string) => void;
+    showBotLoading?: () => void;
+    hideBotLoading?: () => void;
+}
 
 function ResumeChat() {
     const [chatQuestion, setChatQuestion] = useState<string>('');
-    const [chatResponse, setChatResponse] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const formRef = useRef<HTMLFormElement>(null);
+
+    // Initialize the jQuery scrollbar when component mounts
+    useEffect(() => {
+        // Ensure jQuery and chatScript functions are available
+        const checkAndInit = () => {
+            const windowWithJQuery = window as unknown as WindowWithJQuery;
+            if (typeof window !== 'undefined' && windowWithJQuery.$ && typeof windowWithJQuery.insertUserMessage === 'function') {
+                const $ = windowWithJQuery.$;
+                const $messages = $('.messages-content');
+                if ($messages.length > 0 && typeof $messages.mCustomScrollbar === 'function') {
+                    $messages.mCustomScrollbar();
+                }
+            } else {
+                setTimeout(checkAndInit, 100);
+            }
+        };
+        checkAndInit();
+    }, []);
 
     const submitQuestion = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -15,8 +41,19 @@ function ResumeChat() {
             return;
         }
 
+        // Insert user message using jQuery function
+        const windowWithJQuery = window as unknown as WindowWithJQuery;
+        if (typeof windowWithJQuery.insertUserMessage === 'function') {
+            windowWithJQuery.insertUserMessage(chatQuestion);
+        }
+
         setLoading(true);
-        setChatResponse('');
+        setChatQuestion(''); // Clear the input
+
+        // Show loading indicator using jQuery function
+        if (typeof windowWithJQuery.showBotLoading === 'function') {
+            windowWithJQuery.showBotLoading();
+        }
 
         try {
             const response = await fetch('/Chat/AskQuestion', {
@@ -30,15 +67,36 @@ function ResumeChat() {
             if (response.ok) {
                 const result = await response.text();
                 console.log('HTTP response received:', result);
-                setChatResponse(result);
+                
+                // Hide loading and add bot response using jQuery functions
+                if (typeof windowWithJQuery.hideBotLoading === 'function') {
+                    windowWithJQuery.hideBotLoading();
+                }
+                if (typeof windowWithJQuery.addBotResponse === 'function') {
+                    windowWithJQuery.addBotResponse(result);
+                }
             } else {
                 const errorText = await response.text();
                 console.error('HTTP error:', errorText);
-                setChatResponse('Error getting response: ' + errorText);
+                
+                // Hide loading and show error using jQuery functions
+                if (typeof windowWithJQuery.hideBotLoading === 'function') {
+                    windowWithJQuery.hideBotLoading();
+                }
+                if (typeof windowWithJQuery.addBotResponse === 'function') {
+                    windowWithJQuery.addBotResponse('Error getting response: ' + errorText);
+                }
             }
         } catch (error) {
             console.error('Fetch error:', error);
-            setChatResponse('Error getting response: ' + error);
+            
+            // Hide loading and show error using jQuery functions
+            if (typeof windowWithJQuery.hideBotLoading === 'function') {
+                windowWithJQuery.hideBotLoading();
+            }
+            if (typeof windowWithJQuery.addBotResponse === 'function') {
+                windowWithJQuery.addBotResponse('Error getting response: ' + error);
+            }
         } finally {
             setLoading(false);
         }
@@ -55,24 +113,23 @@ function ResumeChat() {
     };
 
     return (
-        <div class="chat">
-            <form ref={formRef}
-                onSubmit={submitQuestion}
-                style={{ marginBottom: '2rem' }}>
-		        <div class="chat-title">
-			        <h1>Ryan Russon</h1>
-			        <h2>Full-Stack Slacker</h2>
-			        <figure className="avatar">
-				        <img src="https://avatars.githubusercontent.com/u/653188?v=4" />
-			        </figure>
-		        </div>
-		        <div class="messages">
-			        <div class="messages-content"></div>
-		        </div>
-		        <div class="message-box">
-			        <textarea
-                        type="text" 
-                        class="message-input"
+        <div className="chat">
+            <div className="chat-title">
+                <h1>Ryan Russon</h1>
+                <h2>Full-Stack Slacker</h2>
+                <figure className="avatar">
+                    <img src="https://avatars.githubusercontent.com/u/653188?v=4" alt="avatar" />
+                </figure>
+            </div>
+            <div className="messages">
+                <div className="messages-content">
+                    {/* Messages will be handled by jQuery functions */}
+                </div>
+            </div>
+            <form ref={formRef} onSubmit={submitQuestion} style={{ marginBottom: '0' }}>
+                <div className="message-box">
+                    <textarea
+                        className="message-input"
                         id="chatQuestion"
                         value={chatQuestion}
                         onChange={(e) => setChatQuestion(e.target.value)}
@@ -81,20 +138,8 @@ function ResumeChat() {
                         rows={8}
                         cols={80}
                         placeholder="Ask a question about Ryan's resume..." />
-                    <button type="submit" class="message-submit" disabled={loading || !chatQuestion.trim()}>Send</button>
-		        </div>
-                {loading && (
-                    <div className="loading-container">
-                        <div className="spinner"></div>
-                        <span>Loading response...</span>
-                    </div>
-                )}
-
-                {chatResponse && !loading && (
-                    <div className="response">
-                        {chatResponse}
-                    </div>
-                )}
+                    <button type="submit" className="message-submit" disabled={loading || !chatQuestion.trim()}>Send</button>
+                </div>
             </form>
         </div>
     );
