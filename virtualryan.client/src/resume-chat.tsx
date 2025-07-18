@@ -115,8 +115,8 @@ function ResumeChat() {
     return (
         <div className="chat">
             <div className="chat-title">
-                <h1>Ryan Russon</h1>
-                <h2>Full-Stack Slacker</h2>
+                <h1>Resume Bot</h1>
+                <h2>Rep. Ryan Russon</h2>
                 <figure className="avatar">
                     <img src="https://avatars.githubusercontent.com/u/653188?v=4" alt="avatar" />
                 </figure>
