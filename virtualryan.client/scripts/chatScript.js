@@ -6,6 +6,7 @@ $(window).load(function () {
 	$messages.mCustomScrollbar();
 	setTimeout(function () {
 		addBotResponse("Hi! I'm a bot that answers questions about Ryan's resume and qualifications. What would you like to know?");
+		$("#chatQuestion").focus();
 	}, 100);
 });
 
