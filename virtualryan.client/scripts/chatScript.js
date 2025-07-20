@@ -18,7 +18,7 @@ function updateScrollbar() {
 }
 
 function setDate() {
-	d = new Date()
+	d = new Date();
 	if (m != d.getMinutes()) {
 		m = d.getMinutes();
 		$('<div class="timestamp">' + d.getHours() + ':' + m + '</div>').appendTo($('.message:last'));
@@ -32,6 +32,7 @@ function insertUserMessage(message) {
 	}
 	$('<div class="message message-personal">' + message + '</div>').appendTo($('.mCSB_container')).addClass('new');
 	setDate();
+	$('.message-input').val(null);
 	updateScrollbar();
 }
 
@@ -62,27 +63,7 @@ window.addBotResponse = addBotResponse;
 window.showBotLoading = showBotLoading;
 window.hideBotLoading = hideBotLoading;
 
-function insertMessage() {
-	msg = $('.message-input').val();
-	if ($.trim(msg) == '') {
-		return false;
-	}
-	$('<div class="message message-personal">' + msg + '</div>').appendTo($('.mCSB_container')).addClass('new');
-	setDate();
-	$('.message-input').val(null);
-	updateScrollbar();
-	setTimeout(function () {
-		fakeMessage();
-	}, 1000 + (Math.random() * 20) * 100);
-}
-
 $('.message-submit').click(function () {
-	insertMessage();
+	msg = $('.message-input').val();
+	insertUserMessage(msg);
 });
-
-$(window).on('keydown', function (e) {
-	if (e.which == 13) {
-		insertMessage();
-		return false;
-	}
-})

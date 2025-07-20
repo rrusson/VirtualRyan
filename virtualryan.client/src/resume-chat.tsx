@@ -1,147 +1,250 @@
-import React, { useState, useRef, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './resume-chat.css';
+import { SpeechToText } from './speechToText';
 
 // Type definitions for jQuery and global functions
 interface WindowWithJQuery extends Window {
-    $?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    insertUserMessage?: (message: string) => void;
-    addBotResponse?: (response: string) => void;
-    showBotLoading?: () => void;
-    hideBotLoading?: () => void;
+	$?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+	insertUserMessage?: (message: string) => void;
+	addBotResponse?: (response: string) => void;
+	showBotLoading?: () => void;
+	hideBotLoading?: () => void;
 }
 
 function ResumeChat() {
-    const [chatQuestion, setChatQuestion] = useState<string>('');
-    const [loading, setLoading] = useState<boolean>(false);
-    const formRef = useRef<HTMLFormElement>(null);
+	const [chatQuestion, setChatQuestion] = useState<string>('');
+	const [loading, setLoading] = useState<boolean>(false);
+	const [isListening, setIsListening] = useState<boolean>(false);
+	const formRef = useRef<HTMLFormElement>(null);
+	const micButtonRef = useRef<HTMLButtonElement>(null);
+	const speechToTextRef = useRef<SpeechToText | null>(null);
 
-    // Initialize the jQuery scrollbar when component mounts
-    useEffect(() => {
-        // Ensure jQuery and chatScript functions are available
-        const checkAndInit = () => {
-            const windowWithJQuery = window as unknown as WindowWithJQuery;
-            if (typeof window !== 'undefined' && windowWithJQuery.$ && typeof windowWithJQuery.insertUserMessage === 'function') {
-                const $ = windowWithJQuery.$;
-                const $messages = $('.messages-content');
-                if ($messages.length > 0 && typeof $messages.mCustomScrollbar === 'function') {
-                    $messages.mCustomScrollbar();
-                }
-            } else {
-                setTimeout(checkAndInit, 100);
-            }
-        };
-        checkAndInit();
-    }, []);
+	// Initialize the jQuery scrollbar when component mounts
+	useEffect(() => {
+		// Ensure jQuery and chatScript functions are available
+		const checkAndInit = () => {
+			const windowWithJQuery = window as unknown as WindowWithJQuery;
+			if (typeof window !== 'undefined' && windowWithJQuery.$ && typeof windowWithJQuery.insertUserMessage === 'function') {
+				const $ = windowWithJQuery.$;
+				const $messages = $('.messages-content');
+				if ($messages.length > 0 && typeof $messages.mCustomScrollbar === 'function') {
+					$messages.mCustomScrollbar();
+				}
+			} else {
+				setTimeout(checkAndInit, 100);
+			}
+		};
+		checkAndInit();
+	}, []);
 
-    const submitQuestion = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        console.log('submitQuestion called with:', chatQuestion);
-        if (!chatQuestion.trim()) {
-            console.log('No question entered.');
-            return;
-        }
+	// Microphone click handler
+	const handleMicClick = async () => {
+		if (isListening) {
+			// Stop listening
+			if (speechToTextRef.current) {
+				speechToTextRef.current.stop();
+			}
+			setIsListening(false);
+			return;
+		}
 
-        // Insert user message using jQuery function
-        const windowWithJQuery = window as unknown as WindowWithJQuery;
-        if (typeof windowWithJQuery.insertUserMessage === 'function') {
-            windowWithJQuery.insertUserMessage(chatQuestion);
-        }
+		try {
+			// Create new SpeechToText instance
+			const stt = new SpeechToText();
+			speechToTextRef.current = stt;
 
-        setLoading(true);
-        setChatQuestion(''); // Clear the input
+			// Set up callbacks
+			stt._onStart = () => {
+				console.log('Speech recognition started');
+				setIsListening(true);
 
-        // Show loading indicator using jQuery function
-        if (typeof windowWithJQuery.showBotLoading === 'function') {
-            windowWithJQuery.showBotLoading();
-        }
+				// Update button visual state
+				if (micButtonRef.current) {
+					micButtonRef.current.style.color = '#ff4444';
+				}
+			};
 
-        try {
-            const response = await fetch('/Chat/AskQuestion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ question: chatQuestion }),
-            });
+			stt._onEnd = () => {
+				console.log('Speech recognition ended');
+				setIsListening(false);
 
-            if (response.ok) {
-                const result = await response.text();
-                console.log('HTTP response received:', result);
-                
-                // Hide loading and add bot response using jQuery functions
-                if (typeof windowWithJQuery.hideBotLoading === 'function') {
-                    windowWithJQuery.hideBotLoading();
-                }
-                if (typeof windowWithJQuery.addBotResponse === 'function') {
-                    windowWithJQuery.addBotResponse(result);
-                }
-            } else {
-                const errorText = await response.text();
-                console.error('HTTP error:', errorText);
-                
-                // Hide loading and show error using jQuery functions
-                if (typeof windowWithJQuery.hideBotLoading === 'function') {
-                    windowWithJQuery.hideBotLoading();
-                }
-                if (typeof windowWithJQuery.addBotResponse === 'function') {
-                    windowWithJQuery.addBotResponse('Error getting response: ' + errorText);
-                }
-            }
-        } catch (error) {
-            console.error('Fetch error:', error);
-            
-            // Hide loading and show error using jQuery functions
-            if (typeof windowWithJQuery.hideBotLoading === 'function') {
-                windowWithJQuery.hideBotLoading();
-            }
-            if (typeof windowWithJQuery.addBotResponse === 'function') {
-                windowWithJQuery.addBotResponse('Error getting response: ' + error);
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
+				// Reset button visual state
+				if (micButtonRef.current) {
+					micButtonRef.current.style.color = '';
+				}
+			};
 
-    // Listen for Enter (Return) key and submit if not Shift+Enter
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            if (formRef.current && chatQuestion.trim() && !loading) {
-                formRef.current.requestSubmit();
-            }
-        }
-    };
+			stt._onError = (error: string) => {
+				console.error('Speech recognition error:', error);
+				setIsListening(false);
 
-    return (
-        <div className="chat">
-            <div className="chat-title">
-                <h1>Resume Bot</h1>
-                <h2>Rep. Ryan Russon</h2>
-                <figure className="avatar">
-                    <img src="https://avatars.githubusercontent.com/u/653188?v=4" alt="avatar" />
-                </figure>
-            </div>
-            <div className="messages">
-                <div className="messages-content">
-                    {/* Messages will be handled by jQuery functions */}
-                </div>
-            </div>
-            <form ref={formRef} onSubmit={submitQuestion} style={{ marginBottom: '0' }}>
-                <div className="message-box">
-                    <textarea
-                        className="message-input"
-                        id="chatQuestion"
-                        value={chatQuestion}
-                        onChange={(e) => setChatQuestion(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        name="chatQuestion"
-                        rows={8}
-                        cols={80}
-                        placeholder="Ask a question about Ryan's resume..." />
-                    <button type="submit" className="message-submit" disabled={loading || !chatQuestion.trim()}>Send</button>
-                </div>
-            </form>
-        </div>
-    );
+				if (micButtonRef.current) {
+					micButtonRef.current.style.color = '';
+				}
+
+				// Show error to user
+				const windowWithJQuery = window as unknown as WindowWithJQuery;
+				if (typeof windowWithJQuery.addBotResponse === 'function') {
+					windowWithJQuery.addBotResponse(`Speech recognition error: ${error}`);
+				}
+			};
+
+			stt._onResult = (transcript: string) => {
+				console.log('Speech transcript received:', transcript);
+
+				if (transcript && transcript.trim()) {
+					// Set the transcript in the input field
+					setChatQuestion(transcript.trim());
+
+					// Auto-submit the form after a short delay
+					setTimeout(() => {
+						if (formRef.current) {
+							formRef.current.requestSubmit();
+						}
+					}, 100);
+				}
+			};
+
+			// Start listening
+			stt.listen();
+
+		} catch (error) {
+			console.error('Error initializing speech recognition:', error);
+			setIsListening(false);
+
+			// Show error to user
+			const windowWithJQuery = window as unknown as WindowWithJQuery;
+			if (typeof windowWithJQuery.addBotResponse === 'function') {
+				windowWithJQuery.addBotResponse('Speech recognition is not supported in this browser or an error occurred.');
+			}
+		}
+	};
+
+	const submitQuestion = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		console.log('submitQuestion called with:', chatQuestion);
+
+		if (!chatQuestion.trim()) {
+			console.log('No question entered.');
+			return;
+		}
+
+		// Insert user message using jQuery function
+		const windowWithJQuery = window as unknown as WindowWithJQuery;
+		if (typeof windowWithJQuery.insertUserMessage === 'function') {
+			windowWithJQuery.insertUserMessage(chatQuestion);
+		}
+
+		setLoading(true);
+		const questionToSubmit = chatQuestion; // Store the question before clearing
+		setChatQuestion(''); // Clear input
+
+		// Show loading indicator using jQuery function
+		if (typeof windowWithJQuery.showBotLoading === 'function') {
+			windowWithJQuery.showBotLoading();
+		}
+
+		try {
+			const response = await fetch('/Chat/AskQuestion', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ question: questionToSubmit }),
+			});
+
+			if (response.ok) {
+				const result = await response.text();
+				console.log('HTTP response received:', result);
+
+				// Hide loading and add bot response using jQuery functions
+				if (typeof windowWithJQuery.hideBotLoading === 'function') {
+					windowWithJQuery.hideBotLoading();
+				}
+				if (typeof windowWithJQuery.addBotResponse === 'function') {
+					windowWithJQuery.addBotResponse(result);
+				}
+			} else {
+				const errorText = await response.text();
+				console.error('HTTP error:', errorText);
+
+				// Hide loading and show error using jQuery functions
+				if (typeof windowWithJQuery.hideBotLoading === 'function') {
+					windowWithJQuery.hideBotLoading();
+				}
+				if (typeof windowWithJQuery.addBotResponse === 'function') {
+					windowWithJQuery.addBotResponse('Error getting response: ' + errorText);
+				}
+			}
+		} catch (error) {
+			console.error('Fetch error:', error);
+
+			// Hide loading and show error using jQuery functions
+			if (typeof windowWithJQuery.hideBotLoading === 'function') {
+				windowWithJQuery.hideBotLoading();
+			}
+			if (typeof windowWithJQuery.addBotResponse === 'function') {
+				windowWithJQuery.addBotResponse('Error getting response: ' + error);
+			}
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// Listen for Enter (Return) key and submit if not Shift+Enter
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+		if (e.key === 'Enter' && !e.shiftKey) {
+			e.preventDefault();
+			if (formRef.current && chatQuestion.trim() && !loading) {
+				formRef.current.requestSubmit();
+			}
+		}
+	};
+
+	return (
+		<div className="chat">
+			<div className="chat-title">
+				<h1>Resume Bot</h1>
+				<h2>Rep. Ryan Russon</h2>
+				<figure className="avatar">
+					<img src="https://avatars.githubusercontent.com/u/653188?v=4" alt="avatar" />
+				</figure>
+				<button
+					ref={micButtonRef}
+					className="mic-button"
+					aria-label={isListening ? "Stop voice input" : "Start voice input"}
+					type="button"
+					onClick={handleMicClick}
+					style={{
+						color: isListening ? '#ff4444' : '',
+						animation: isListening ? 'pulse 1s infinite' : 'none'
+					}}
+				>
+					<i className="fa fa-microphone" />
+				</button>
+			</div>
+			<div className="messages">
+				<div className="messages-content">
+				</div>
+			</div>
+			<form ref={formRef} onSubmit={submitQuestion} style={{ marginBottom: '0' }}>
+				<div className="message-box">
+					<textarea
+						className="message-input"
+						id="chatQuestion"
+						value={chatQuestion}
+						onChange={(e) => setChatQuestion(e.target.value)}
+						onKeyDown={handleKeyDown}
+						name="chatQuestion"
+						rows={8}
+						cols={80}
+						placeholder="Ask a question about Ryan's resume..." />
+					<button type="submit" className="message-submit" disabled={loading || !chatQuestion.trim()}>Send</button>
+				</div>
+			</form>
+		</div>
+	);
 }
+
 export default ResumeChat;
