@@ -7,6 +7,8 @@
     <SpaRoot>..\virtualryan.client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:62370</SpaProxyServerUrl>
+    <!-- Set ASPNETCORE_ENVIRONMENT to Production for Release builds -->
+    <EnvironmentName Condition=" '$(Configuration)' == 'Release' ">Production</EnvironmentName>
   </PropertyGroup>
 
   <ItemGroup>

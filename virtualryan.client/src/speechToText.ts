@@ -24,17 +24,21 @@ export class SpeechToText {
 		// Check for browser support
 		const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-		navigator.mediaDevices.getUserMedia({ audio: true })
-			.then(() => {
-				console.log('Microphone access granted');
-			})
-			.catch(error => {
-				console.error('Microphone access denied or failed:', error);
-				if (this._onError) {
-					this._onError(error);
-				}
-				return;
-			});
+		navigator.mediaDevices.getUserMedia({
+			audio: {
+				echoCancellation: true,
+				noiseSuppression: true,
+				sampleRate: 44100
+			}
+		}).then(() => {
+			console.log('Microphone access granted');
+		}).catch(error => {
+			console.error('Microphone access denied or failed:', error);
+			if (this._onError) {
+				this._onError(error);
+			}
+			return;
+		});
 
 		if (!SpeechRecognition) {
 			const error = 'Speech recognition not supported in this browser';

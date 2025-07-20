@@ -11,7 +11,20 @@ namespace VirtualRyan.Server
 			// Configure logging
 			builder.Logging.ClearProviders();
 			builder.Logging.AddConsole();
-			builder.Logging.AddFileLogger("C:\\inetpub\\logs\\AppLogs\\VirtualRyanApiLog.txt");
+
+			string logPath;
+			if (builder.Environment.IsDevelopment())
+			{
+				// Use current executable directory for development
+				var exeDir = AppContext.BaseDirectory;
+				logPath = Path.Combine(exeDir, "VirtualRyanApiLog.txt");
+			}
+			else
+			{
+				// Use fixed path for production
+				logPath = "C:\\inetpub\\logs\\AppLogs\\VirtualRyanApiLog.txt";
+			}
+			builder.Logging.AddFileLogger(logPath);
 
 			// Add services to the container.
 			builder.Services.AddControllers();
