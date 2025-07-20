@@ -13,6 +13,7 @@ namespace VirtualRyan.Server.Controllers
 		public ChatController(ILogger<ChatController> logger)
 		{
 			_logger = logger;
+			_logger.LogInformation("ChatController initialized");
 		}
 
 		public class ChatRequest
@@ -23,13 +24,27 @@ namespace VirtualRyan.Server.Controllers
 		[HttpPost("AskQuestion")]
 		public async Task<string> AskQuestion([FromBody] ChatRequest request)
 		{
-			_logger.LogInformation("Received question: {Question}", request.Question);
+			if (string.IsNullOrWhiteSpace(request?.Question))
+			{
+				_logger.LogWarning("Received an empty or null question.");
+				throw new ArgumentException("Question cannot be null or empty.", nameof(request.Question));
+			}
 
-			RyanChat chatClient = new RyanChat();
-			string response = await chatClient.AskQuestionAsync(new string[] { request.Question }).ConfigureAwait(false);
+			_logger.LogInformation("RECEIVED QUESTION: {Question}", request.Question);
 
-			_logger.LogInformation($"Returning response: {response}");
-			return response;
+			try
+			{
+				RyanChat chatClient = new RyanChat();
+				string response = await chatClient.AskQuestionAsync([request.Question]).ConfigureAwait(false);
+				_logger.LogInformation("RETURNING RESPONSE: {Response}", response);
+
+				return response;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "ERROR in AskQuestion for question: {Question}", request.Question);
+				throw;
+			}
 		}
 	}
 }
