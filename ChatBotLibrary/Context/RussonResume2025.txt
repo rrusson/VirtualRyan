@@ -80,8 +80,47 @@ https://www.officedepot.com
 * Architected, created, and redesigned databases and web apps to support accounting and financial systems
 * Created and performance tuned complex T-SQL stored procedures, DTS packages, views, triggers, etc.
 
+Contract Programmer, MAPEI Inc., Deerfield Beach, FL, 06/2004 - 07/2004
+http://www.mapei.com
+* Architected and built databases and new web applications for enterprise-wide management and production of product catalog information [technologies used: ASP.NET, VS.NET, Word VBA, and SQL Server]
+
+Contract Programmer, Ryder System Inc., Miami, FL, 07/2004 – 11/2004
+http://www.ryder.com
+* Architected and created databases and new web applications for enterprise-wide infrastructure/equipment management [technologies used: ASP.NET, VS.NET, and SQL Server 2000]
+* Managed and cleansed data; created DTS packages to import Excel and Access data to SQL Server
+* Trained and tutored other team members in the use of Microsoft Enterprise Manager (SQL Server)
+
+Webmaster, PC Universe, Boca Raton,	FL, 02/2004 - 06/2004
+http://www.pcuniverse.com
+* Created and maintained web applications written with VB.NET, ADO, ASP, ASP.NET, COM+, ActiveX, MS Administrative Tools, VB.NET, Enterprise Manager, SQL Profiler, Query Analyzer, JavaScript, Transact-SQL (T-SQL), VB 6.0, VBScript, Visual Studio.NET, and XML
+* Mentored junior member of development team in HTML, design, and various software packages
+* Wrote complex T-SQL stored procedures, DTS packages, views, triggers, etc. and performance tuned same
+* Integrated legacy EDI systems with web site; worked with vendors to troubleshoot EDI systems; and reverse engineered undocumented internal and 3rd party applications
+
+Contract Programmer, G. Neil Inc., Sunrise, FL, 10/2003 - 01/2004
+http://www.gneil.com
+* Developed new functionality and provided support for $1M/month e-commerce site in a web farm environment
+* Wrote complex T-SQL stored procedures, DTS packages, views, triggers, etc. and performance tuned same
+* Architected, programmed, and created detailed technical and functional specifications for e-commerce initiatives
+* Created user registration pages, secure download mechanism, content management system, and other items
+* Technologies used included: ADO, ASP, C#.NET, Enterprise Manager, SQL Profiler, Query Analyzer, JavaScript, Transact-SQL (T-SQL), VBScript, and Visual Studio.NET
+
+Contract Programmer, American Express, Weston, FL, 03/2003 - 09/2003
+http://www.americanexpress.com
+* Created enterprise web applications with rich DHTML interfaces, extensive T-SQL code, and complex business logic including: real-time machine status application; completely automated vendor accountability reporting with e-mail survey components; employee vacation scheduling, administration, and tracking system
+* Solely responsible for 4-month project to develop vendor accountability reporting application, including: architecting, project scoping, gathering requirements, advising senior management, and coordinating activities of a small team from accounting, quality, and other departments
+* Provided assistance and advice to less experienced developers, advised project sponsors on technical issues, created interface prototypes, and helped management to develop coding standards and best practices 
+* Technologies used included: ADO, ASP, Dreamweaver, JavaScript (client and server), MS Remote Scripting, Photoshop, SQL Profiler, SQL Query Analyzer, SQL Server 7.0, Transact-SQL (T-SQL), VBScript, Visual Studio.NET, and XML
+
+Senior Contract Programmer, PriceWaterhouseCoopers, Tampa, FL/Dallas, TX, 10/2002 - 03/2003
+http://www.pwc.com
+* Worked with a distributed, multidisciplinary team developing a high profile, multilingual intranet application for global organizational use
+* Created complex interface and backend application using ASP, XML, ADO, VBScript, client-side and server-side JavaScript, Oracle, and other technologies
+* Managed and tracked development of function points using SourceSafe, Visual Studio, Lotus Notes, various Oracle applications, and project management software
+* Advised project sponsors on system design, generated new interface ideas, and created interface prototypes for users- group and management approval
+
 
 EDUCATION:
-MS - Management Information Systems		2002	U. of South Florida, Tampa, FL
-MA - Psychology		2003	U. of South Florida, Tampa, FL
-BS - Cum Laude, Psychology		1992	U. of Washington, Seattle, WA
+MS - Management Information Systems (2002) University of South Florida, Tampa, FL
+MA - Psychology (2003) University of South Florida, Tampa, FL
+BS - Cum Laude, Psychology (1992) University of Washington, Seattle, WA
