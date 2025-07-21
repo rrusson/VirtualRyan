@@ -1,6 +1,9 @@
 @VirtualRyan.Server_HostAddress = http://localhost:5074
 
-GET {{VirtualRyan.Server_HostAddress}}/weatherforecast/
+POST {{VirtualRyan.Server_HostAddress}}/chat/AskQuestion/
+Content-Type: application/json
 Accept: application/json
-
+{
+  "question": "What is the meaning of life?"
+}
 ###

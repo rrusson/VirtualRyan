@@ -177,6 +177,7 @@ Messages
 		.messages .message.new {
 			transform: scale(0);
 			transform-origin: 0 0;
+			text-align: left;
 			-webkit-animation: bounce 500ms linear both;
 			animation: bounce 500ms linear both;
 		}
