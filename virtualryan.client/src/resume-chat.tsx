@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import './resume-chat.css';
 import { SpeechToText } from './speechToText';
 import { TextToSpeech } from './textToSpeech';
+import { Pronunciation } from './pronunciation';
 
 // Type definitions for jQuery and global functions
 interface WindowWithJQuery extends Window {
@@ -22,10 +23,12 @@ function ResumeChat() {
 	const micButtonRef = useRef<HTMLButtonElement>(null);
 	const speechToTextRef = useRef<SpeechToText | null>(null);
 	const textToSpeechRef = useRef<TextToSpeech | null>(null);
+	const pronunciationRef = useRef<Pronunciation | null>(null);
 
-	// Initialize TTS instance
+	// Initialize TTS and Pronunciation instance
 	useEffect(() => {
 		textToSpeechRef.current = new TextToSpeech();
+		pronunciationRef.current = new Pronunciation();
 
 		// Log the selected voice after a short delay to allow voice loading
 		setTimeout(() => {
@@ -63,8 +66,12 @@ function ResumeChat() {
 				// Stop any current speech before starting new one
 				textToSpeechRef.current.stop();
 
-				// Note: lang is not specified here as the TTS class will try to pick the preferred voice
-				textToSpeechRef.current.speak(text, {
+				// Use phonetic text for TTS, but original for chat
+				const phoneticText = pronunciationRef.current
+					? pronunciationRef.current.makeTlasPhonetic(text)
+					: text;
+
+				textToSpeechRef.current.speak(phoneticText, {
 					rate: 0.9,
 					pitch: 1.0,
 					volume: 0.8
