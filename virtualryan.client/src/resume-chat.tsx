@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import './resume-chat.css';
 import { SpeechToText } from './speechToText';
+import { TextToSpeech } from './textToSpeech';
 
 // Type definitions for jQuery and global functions
 interface WindowWithJQuery extends Window {
@@ -16,9 +17,26 @@ function ResumeChat() {
 	const [chatQuestion, setChatQuestion] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 	const [isListening, setIsListening] = useState<boolean>(false);
+	const [lastInputWasSpeech, setLastInputWasSpeech] = useState<boolean>(false);
 	const formRef = useRef<HTMLFormElement>(null);
 	const micButtonRef = useRef<HTMLButtonElement>(null);
 	const speechToTextRef = useRef<SpeechToText | null>(null);
+	const textToSpeechRef = useRef<TextToSpeech | null>(null);
+
+	// Initialize TTS instance
+	useEffect(() => {
+		textToSpeechRef.current = new TextToSpeech();
+
+		// Log the selected voice after a short delay to allow voice loading
+		setTimeout(() => {
+			const selectedVoice = textToSpeechRef.current?.getSelectedVoice();
+			if (selectedVoice) {
+				console.log('TextToSpeech initialized with voice:', selectedVoice.name, selectedVoice.lang);
+			} else {
+				console.log('TextToSpeech initialized but no voice selected yet');
+			}
+		}, 1000);
+	}, []);
 
 	// Initialize the jQuery scrollbar when component mounts
 	useEffect(() => {
@@ -37,6 +55,25 @@ function ResumeChat() {
 		};
 		checkAndInit();
 	}, []);
+
+	// Function to speak bot response
+	const speakBotResponse = (text: string) => {
+		if (textToSpeechRef.current) {
+			try {
+				// Stop any current speech before starting new one
+				textToSpeechRef.current.stop();
+
+				// Note: lang is not specified here as the TTS class will try to pick the preferred voice
+				textToSpeechRef.current.speak(text, {
+					rate: 0.9,
+					pitch: 1.0,
+					volume: 0.8
+				});
+			} catch (error) {
+				console.error('Error converting text to speech:', error);
+			}
+		}
+	};
 
 	// Microphone click handler
 	const handleMicClick = async () => {
@@ -78,6 +115,7 @@ function ResumeChat() {
 			stt._onError = (error: string) => {
 				console.error('Speech recognition error:', error);
 				setIsListening(false);
+				setLastInputWasSpeech(false);
 
 				if (micButtonRef.current) {
 					micButtonRef.current.style.color = '';
@@ -94,6 +132,9 @@ function ResumeChat() {
 				console.log('Speech transcript received:', transcript);
 
 				if (transcript && transcript.trim()) {
+					// Set flag that last input was speech
+					setLastInputWasSpeech(true);
+
 					// Set the transcript in the input field
 					setChatQuestion(transcript.trim());
 
@@ -112,6 +153,7 @@ function ResumeChat() {
 		} catch (error) {
 			console.error('Error initializing speech recognition:', error);
 			setIsListening(false);
+			setLastInputWasSpeech(false);
 
 			// Show error to user
 			const windowWithJQuery = window as unknown as WindowWithJQuery;
@@ -138,7 +180,13 @@ function ResumeChat() {
 
 		setLoading(true);
 		const questionToSubmit = chatQuestion; // Store the question before clearing
+		const wasInputSpeech = lastInputWasSpeech; // Capture the flag before clearing
 		setChatQuestion(''); // Clear input
+
+		// Reset the speech flag for typed inputs
+		if (!wasInputSpeech) {
+			setLastInputWasSpeech(false);
+		}
 
 		// Show loading indicator using jQuery function
 		if (typeof windowWithJQuery.showBotLoading === 'function') {
@@ -165,6 +213,14 @@ function ResumeChat() {
 				if (typeof windowWithJQuery.addBotResponse === 'function') {
 					windowWithJQuery.addBotResponse(result);
 				}
+
+				// Speak the bot response if the last input was speech
+				if (wasInputSpeech) {
+					console.log('Speaking bot response due to speech input');
+					speakBotResponse(result);
+					// Reset the flag after speaking
+					setLastInputWasSpeech(false);
+				}
 			} else {
 				const errorText = await response.text();
 				console.error('HTTP error:', errorText);
@@ -176,6 +232,12 @@ function ResumeChat() {
 				if (typeof windowWithJQuery.addBotResponse === 'function') {
 					windowWithJQuery.addBotResponse('Error getting response: ' + errorText);
 				}
+
+				// Speak error if the last input was speech
+				if (wasInputSpeech) {
+					speakBotResponse('Error getting response: ' + errorText);
+					setLastInputWasSpeech(false);
+				}
 			}
 		} catch (error) {
 			console.error('Fetch error:', error);
@@ -186,6 +248,12 @@ function ResumeChat() {
 			}
 			if (typeof windowWithJQuery.addBotResponse === 'function') {
 				windowWithJQuery.addBotResponse('Error getting response: ' + error);
+			}
+
+			// Speak error if the last input was speech
+			if (wasInputSpeech) {
+				speakBotResponse('Error getting response: ' + String(error));
+				setLastInputWasSpeech(false);
 			}
 		} finally {
 			setLoading(false);
@@ -199,6 +267,15 @@ function ResumeChat() {
 			if (formRef.current && chatQuestion.trim() && !loading) {
 				formRef.current.requestSubmit();
 			}
+		}
+	};
+
+	// Handle manual input changes (typing) - reset speech flag
+	const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+		setChatQuestion(e.target.value);
+		// If user is typing manually, reset the speech flag
+		if (!isListening) {
+			setLastInputWasSpeech(false);
 		}
 	};
 
@@ -234,7 +311,7 @@ function ResumeChat() {
 						className="message-input"
 						id="chatQuestion"
 						value={chatQuestion}
-						onChange={(e) => setChatQuestion(e.target.value)}
+						onChange={handleInputChange}
 						onKeyDown={handleKeyDown}
 						name="chatQuestion"
 						rows={8}
