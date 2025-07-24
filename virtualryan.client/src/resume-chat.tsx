@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
-import './resume-chat.css';
 import { SpeechToText } from './speechToText';
 import { TextToSpeech } from './textToSpeech';
 import { Pronunciation } from './pronunciation';

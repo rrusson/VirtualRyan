@@ -26,8 +26,8 @@ Chat
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: 60%;
-	height: 60%;
+	width: 80%;
+	height: 80%;
 	max-height: 800px;
 	z-index: 2;
 	overflow: hidden;
@@ -298,7 +298,68 @@ Message Box
 		}
 
 /*--------------------
-Custom Srollbar
+React Component Styles (from resume-chat.css)
+--------------------*/
+.chatQuestion {
+	color: darkblue;
+	padding: 2px;
+}
+
+.response {
+	border: 1px solid #ccc;
+	padding: 1rem;
+	margin-top: 1rem;
+	color: black;
+	text-align: left;
+	background-color: #f9f9f9;
+	white-space: pre-wrap;
+}
+
+.spinner {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	border: 3px solid #f3f3f3;
+	border-top: 3px solid #646cff;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin-right: 10px;
+}
+
+.loading-container {
+	display: flex;
+	align-items: center;
+	margin-top: 1rem;
+	padding: 1rem;
+	font-style: italic;
+}
+
+.mic-button {
+	position: absolute;
+	right: 20px;
+	top: 10px;
+	background: none;
+	border: none;
+	color: #fff;
+	font-size: 22px;
+	cursor: pointer;
+	z-index: 2;
+	padding: 0;
+	outline: none;
+	transition: color 0.2s;
+}
+
+	.mic-button:hover {
+		color: #66C;
+	}
+
+	.mic-button:disabled {
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+/*--------------------
+Custom Scrollbar
 --------------------*/
 .mCSB_scrollTools {
 	margin: 1px -3px 1px 0;
@@ -315,8 +376,35 @@ Custom Srollbar
 }
 
 /*--------------------
-Bounce
+Animations & Keyframes
 --------------------*/
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes pulse {
+	0% {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	50% {
+		opacity: 0.7;
+		transform: scale(1.1);
+	}
+
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
 @-webkit-keyframes bounce {
 	0% {
 		transform: matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);

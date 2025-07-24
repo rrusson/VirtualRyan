@@ -58,9 +58,12 @@
 // General
 //------------------------------------------------------------------------------*/
 body {
-  background-color: #333;
-  margin: 0;
-  overflow: hidden;
+    background-color: #333;
+    margin: 0;
+    overflow: hidden;
+    position: fixed;
+    width: 100vw;
+    height: 100dvh; /* Use dynamic viewport height for mobile */
 }
 
 .stage {
