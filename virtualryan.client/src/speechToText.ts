@@ -1,7 +1,4 @@
-// speechToText.ts
 // Provides basic speech-to-text functionality using the Web Speech API.
-
-// Extend the Window interface to include speech recognition
 declare global {
 	interface Window {
 		SpeechRecognition?: any;
@@ -11,14 +8,12 @@ declare global {
 
 export class SpeechToText {
 	private recognition: any = null;
-	public _onResult: ((transcript: string) => void) | null = null;
-	public _onError: ((error: string) => void) | null = null;
-	public _onStart: (() => void) | null = null;
-	public _onEnd: (() => void) | null = null;
+	public onResult: ((transcript: string) => void) | null = null;
+	public onError: ((error: string) => void) | null = null;
+	public onStart: (() => void) | null = null;
+	public onEnd: (() => void) | null = null;
 
-	constructor() {
-		// Initialize properties
-	}
+	constructor() {	}
 
 	listen(): void {
 		// Check for browser support
@@ -34,8 +29,8 @@ export class SpeechToText {
 			console.log('Microphone access granted');
 		}).catch(error => {
 			console.error('Microphone access denied or failed:', error);
-			if (this._onError) {
-				this._onError(error);
+			if (this.onError) {
+				this.onError(error);
 			}
 			return;
 		});
@@ -43,8 +38,8 @@ export class SpeechToText {
 		if (!SpeechRecognition) {
 			const error = 'Speech recognition not supported in this browser';
 			console.error(error);
-			if (this._onError) {
-				this._onError(error);
+			if (this.onError) {
+				this.onError(error);
 			}
 			return;
 		}
@@ -61,8 +56,8 @@ export class SpeechToText {
 		// Set up event handlers
 		this.recognition.onstart = () => {
 			console.log('Speech recognition started');
-			if (this._onStart) {
-				this._onStart();
+			if (this.onStart) {
+				this.onStart();
 			}
 		};
 
@@ -76,23 +71,23 @@ export class SpeechToText {
 				console.log('Speech received: ' + transcript);
 				console.log('Confidence: ' + confidence);
 
-				if (this._onResult) {
-					this._onResult(transcript);
+				if (this.onResult) {
+					this.onResult(transcript);
 				}
 			}
 		};
 
 		this.recognition.onerror = (event: any) => {
 			console.error('Speech recognition error:', event.error);
-			if (this._onError) {
-				this._onError(event.error);
+			if (this.onError) {
+				this.onError(event.error);
 			}
 		};
 
 		this.recognition.onend = () => {
 			console.log('Speech recognition ended');
-			if (this._onEnd) {
-				this._onEnd();
+			if (this.onEnd) {
+				this.onEnd();
 			}
 		};
 
@@ -101,8 +96,8 @@ export class SpeechToText {
 			this.recognition.start();
 		} catch (error) {
 			console.error('Error starting speech recognition:', error);
-			if (this._onError) {
-				this._onError(error instanceof Error ? error.message : String(error));
+			if (this.onError) {
+				this.onError(error instanceof Error ? error.message : String(error));
 			}
 		}
 	}

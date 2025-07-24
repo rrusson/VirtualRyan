@@ -19,9 +19,10 @@ function updateScrollbar() {
 
 function setDate() {
 	d = new Date();
-	if (m != d.getMinutes()) {
+	if (m != d.getMinutes() || h != d.getHours()) {
+		h = d.getHours();
 		m = d.getMinutes();
-		$('<div class="timestamp">' + d.getHours() + ':' + m + '</div>').appendTo($('.message:last'));
+		$('<div class="timestamp">' + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + '</div>').appendTo($('.message:last'));
 	}
 }
 
@@ -30,6 +31,7 @@ function insertUserMessage(message) {
 	if ($.trim(message) == '') {
 		return false;
 	}
+
 	$('<div class="message message-personal">' + message + '</div>').appendTo($('.mCSB_container')).addClass('new');
 	setDate();
 	$('.message-input').val(null);

@@ -18,7 +18,7 @@ function ResumeChat() {
 	const [chatQuestion, setChatQuestion] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 	const [isListening, setIsListening] = useState<boolean>(false);
-	const [lastInputWasSpeech, setLastInputWasSpeech] = useState<boolean>(false);
+	const [wasLastInputSpeech, setLastInputWasSpeech] = useState<boolean>(false);
 	const formRef = useRef<HTMLFormElement>(null);
 	const micButtonRef = useRef<HTMLButtonElement>(null);
 	const speechToTextRef = useRef<SpeechToText | null>(null);
@@ -82,7 +82,6 @@ function ResumeChat() {
 		}
 	};
 
-	// Microphone click handler
 	const handleMicClick = async () => {
 		if (isListening) {
 			// Stop listening
@@ -94,32 +93,29 @@ function ResumeChat() {
 		}
 
 		try {
-			// Create new SpeechToText instance
 			const stt = new SpeechToText();
 			speechToTextRef.current = stt;
 
 			// Set up callbacks
-			stt._onStart = () => {
+			stt.onStart = () => {
 				console.log('Speech recognition started');
 				setIsListening(true);
 
-				// Update button visual state
 				if (micButtonRef.current) {
 					micButtonRef.current.style.color = '#ff4444';
 				}
 			};
 
-			stt._onEnd = () => {
+			stt.onEnd = () => {
 				console.log('Speech recognition ended');
 				setIsListening(false);
 
-				// Reset button visual state
 				if (micButtonRef.current) {
 					micButtonRef.current.style.color = '';
 				}
 			};
 
-			stt._onError = (error: string) => {
+			stt.onError = (error: string) => {
 				console.error('Speech recognition error:', error);
 				setIsListening(false);
 				setLastInputWasSpeech(false);
@@ -135,7 +131,7 @@ function ResumeChat() {
 				}
 			};
 
-			stt._onResult = (transcript: string) => {
+			stt.onResult = (transcript: string) => {
 				console.log('Speech transcript received:', transcript);
 
 				if (transcript && transcript.trim()) {
@@ -148,6 +144,7 @@ function ResumeChat() {
 					// Auto-submit the form after a short delay
 					setTimeout(() => {
 						if (formRef.current) {
+							textToSpeechRef.current?.stop();
 							formRef.current.requestSubmit();
 						}
 					}, 100);
@@ -172,7 +169,6 @@ function ResumeChat() {
 
 	const submitQuestion = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		console.log('submitQuestion called with:', chatQuestion);
 
 		if (!chatQuestion.trim()) {
 			console.log('No question entered.');
@@ -186,16 +182,14 @@ function ResumeChat() {
 		}
 
 		setLoading(true);
-		const questionToSubmit = chatQuestion; // Store the question before clearing
-		const wasInputSpeech = lastInputWasSpeech; // Capture the flag before clearing
-		setChatQuestion(''); // Clear input
+		const questionToSubmit = chatQuestion; // Store the question and speech flag before clearing
+		const wasInputSpeech = wasLastInputSpeech;
+		setChatQuestion('');
 
-		// Reset the speech flag for typed inputs
 		if (!wasInputSpeech) {
 			setLastInputWasSpeech(false);
 		}
 
-		// Show loading indicator using jQuery function
 		if (typeof windowWithJQuery.showBotLoading === 'function') {
 			windowWithJQuery.showBotLoading();
 		}
@@ -211,9 +205,7 @@ function ResumeChat() {
 
 			if (response.ok) {
 				const result = await response.text();
-				console.log('HTTP response received:', result);
 
-				// Hide loading and add bot response using jQuery functions
 				if (typeof windowWithJQuery.hideBotLoading === 'function') {
 					windowWithJQuery.hideBotLoading();
 				}
@@ -221,11 +213,8 @@ function ResumeChat() {
 					windowWithJQuery.addBotResponse(result);
 				}
 
-				// Speak the bot response if the last input was speech
 				if (wasInputSpeech) {
-					console.log('Speaking bot response due to speech input');
 					speakBotResponse(result);
-					// Reset the flag after speaking
 					setLastInputWasSpeech(false);
 				}
 			} else {
@@ -240,11 +229,7 @@ function ResumeChat() {
 					windowWithJQuery.addBotResponse('Error getting response: ' + errorText);
 				}
 
-				// Speak error if the last input was speech
-				if (wasInputSpeech) {
-					speakBotResponse('Error getting response: ' + errorText);
-					setLastInputWasSpeech(false);
-				}
+				setLastInputWasSpeech(false);
 			}
 		} catch (error) {
 			console.error('Fetch error:', error);
@@ -257,11 +242,7 @@ function ResumeChat() {
 				windowWithJQuery.addBotResponse('Error getting response: ' + error);
 			}
 
-			// Speak error if the last input was speech
-			if (wasInputSpeech) {
-				speakBotResponse('Error getting response: ' + String(error));
-				setLastInputWasSpeech(false);
-			}
+			setLastInputWasSpeech(false);
 		} finally {
 			setLoading(false);
 		}

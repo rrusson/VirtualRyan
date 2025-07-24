@@ -36,11 +36,11 @@ namespace ChatBotLibrary
 		private static ChatCompletionsOptions GetResumeChatOptions(string[] messages, string model)
 		{
 			// Add a system role message before the user message
-			var systemMsg = new ChatRequestSystemMessage(@"Answer questions about Ryan Russon, a senior full-stack .NET software developer seeking employment.
-				Answer questions based on the included resume and background information context.
-				Be succinct, without extra phrasing like 'based off his resume...',
-				if asked about a missing skill mention he's experimented with most technologies and a quick learner, 
-				and emphasize his strong work ethic and reliability when apropos.");
+			var systemMsg = new ChatRequestSystemMessage(@"Answer questions about Ryan Russon, 
+				a senior full-stack .NET software developer seeking employment, based on the included resume and other provided context.
+				Be succinct, omitting extra phrasing like 'based off his resume'.
+				If asked about a missing skill mention he's experimented with most technologies and a quick learner.
+				Emphasize his strong work ethic, attention to detail, and reliability when apropos.");
 
 			string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 			string contextFolderPath = Path.Combine(baseDirectory, "Context");
@@ -59,7 +59,7 @@ namespace ChatBotLibrary
 			{
 				Temperature = 1.0f,
 				NucleusSamplingFactor = 1.0f,
-				MaxTokens = 1000,
+				MaxTokens = 500,
 				Model = model
 			};
 

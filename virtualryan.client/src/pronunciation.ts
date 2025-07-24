@@ -1,4 +1,4 @@
-// Provides utilities for handling pronunciation logic in the application.
+﻿// Provides utilities for handling pronunciation logic in the application.
 export class Pronunciation {
 
     public makeTlasPhonetic(input: string): string {
@@ -8,10 +8,12 @@ export class Pronunciation {
             "ASP.NET": "A S P dot net",
             "AWS": "A W S",
             "C#": "C sharp",
+            "C#/.NET": "C sharp dot net",
             "C++": "C plus plus",
 			"CI/CD": "C I C D",
             "CSS": "C S S",
             "DB": "database",
+            "DBs": "databases",
             "DI": "dependency injection",
             "DTS": "D T S",
             "ETL": "E T L",
@@ -19,13 +21,13 @@ export class Pronunciation {
             "HTML": "H T M L",
             "IoC": "inversion of control",
             "JavaScript": "java script",
+            "Jira": "Jeara",
             "jQuery": "jay query",
-            "JSON": "jay son",
+            "JSON": "jayson",
             "LINQ": "link",
             "LLM": "L L M",
             "MCP": "M C P",
             "MOQ": "M O Q",
-            "MS SQL": "M S sequel",
             "MVC": "M V C",
             "MVVM": "M V V M",
             "NoSQL": "no sequel",
@@ -38,6 +40,7 @@ export class Pronunciation {
             "S3": "S three",
             "SNS": "S N S",
             "SQL": "sequel",
+            "SQLite": "sequel light",
             "SQS": "S Q S",
             "SSIS": "S S I S",
             "SSRS": "S S R S",
@@ -59,6 +62,9 @@ export class Pronunciation {
             const pattern = new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, "gi");
             result = result.replace(pattern, phoneticMap[key]);
         }
+
+        // Bonus: let's shorten speech by removing any text in parentheses (including the parentheses)
+        result = result.replace(/\s*\([^)]*\)/g, "");
 
         return result;
     }
