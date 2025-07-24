@@ -1,0 +1,31 @@
+﻿I have a Masters in Psychology, earned as part of a Clinical Psychology Ph.D. program. Due to some poor choices, I didn't major in Computer Science, but found my way back to programming during the course of my graduate studies.
+I completed all coursework and a few internships in the Ph.D. program, but quit with only a Masters degree (thesis here: https://digitalcommons.usf.edu/etd/1463/) to start my programming career.
+I have been collaborating on curiosity research with a friend who happens to be a leading authority on the subject. Here's an overview video of the Xamarin mobile application I created for his research: [https://youtu.be/HfSLC6bRdEo] and a paper I co-authored: 
+[Litman, J., Hutchins, T., & Russon, R. (2005). Epistemic curiosity, feeling-of-knowing, and exploratory behaviour. Cognition and Emotion, 19(4), 559–582. https://doi.org/10.1080/02699930441000427].
+
+BIOGRAPHICAL INFORMATION:
+Gender: Male
+Race: Caucasian
+Hair: Black
+Eyes: Brown/Hazel
+Status: Married
+Children: 2 (currently attending college)
+County: Broward
+Drug of Choice: Coffee
+Favorite Scotch: Glenlivet
+Favorite Tequila: Milagro Reposado
+Favorite Beer: Jai Alai IPA
+Favorite Color: Cobalt Blue
+Favorite Passtime (besides programming): Playing piano
+Humor: Sarcastic, absurdist, and self-deprecating
+Myers Briggs Type: INTJ
+
+INTERESTS:
+Music (Alternative, Ambient, Asian Massive, Baroque, Bebop, Bhangra, Big Band, Bluegrass, Blues, Bollywood, Bossanova, Chamber Music, Classic Rock, Classical, Disco, Dixieland, Drum&Bass, Electronica, Flamenco, Funk, Goa, Gospel, Grunge, Heavy Metal, House, Industrial, Jazz, Latin, Mambo, Mashup, New Wave, Primus, Psychadelic, Punk, Qawwali, Ragtime, R&B, Reggae, Rockabilly, Salsa, Samba, Ska, Speed Metal, Tango, Trance, Tropicalia, Trip-Hop, Western, World, Zydeco),
+AI, Fine Art, Fonts, Graphic Design, Movies, Museums, Physical Fitness, Piano, Politics, Photography, Programming, Psychology, Quora, Science, Science Fiction, Snow Skiing, Swimming, and Travel
+
+VOLUNTEER WORK:
+- Teaching the programming merit badge (and occassionally others) to Boy Scouts at the annual Merit Badge College. (See https://github.com/rrusson/BSA-Programming-Merit-Badge)
+- Helping with political campaigns, including canvassing, phone banking, etc.
+- Volunteering at tech conferences
+- Poll watching for elections

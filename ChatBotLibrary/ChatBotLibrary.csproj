@@ -9,11 +9,15 @@
 
   <ItemGroup>
     <None Remove="Context\RussonResume2025.txt" />
+    <None Remove="Context\RyanBioInfo.txt" />
     <None Remove="Context\RyanCoverLetterFodder.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Context\RussonResume2025.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Context\RyanBioInfo.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Context\RyanCoverLetterFodder.txt">
