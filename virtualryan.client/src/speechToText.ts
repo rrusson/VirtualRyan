@@ -19,22 +19,6 @@ export class SpeechToText {
 		// Check for browser support
 		const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-		navigator.mediaDevices.getUserMedia({
-			audio: {
-				echoCancellation: true,
-				noiseSuppression: true,
-				sampleRate: 44100
-			}
-		}).then(() => {
-			console.log('Microphone access granted');
-		}).catch(error => {
-			console.error('Microphone access denied or failed:', error);
-			if (this.onError) {
-				this.onError(error);
-			}
-			return;
-		});
-
 		if (!SpeechRecognition) {
 			const error = 'Speech recognition not supported in this browser';
 			console.error(error);
@@ -44,10 +28,7 @@ export class SpeechToText {
 			return;
 		}
 
-		// Create new recognition instance
 		this.recognition = new SpeechRecognition();
-
-		// Configure recognition settings
 		this.recognition.lang = 'en-US';
 		this.recognition.interimResults = false;
 		this.recognition.continuous = false;

@@ -48,13 +48,11 @@ function addBotResponse(response) {
 	updateScrollbar();
 }
 
-// Function to show loading indicator
 function showBotLoading() {
 	$('<div class="message loading new"><figure class="avatar"><img src="https://avatars.githubusercontent.com/u/653188?v=4" /></figure><span></span></div>').appendTo($('.mCSB_container'));
 	updateScrollbar();
 }
 
-// Function to hide loading indicator
 function hideBotLoading() {
 	$('.message.loading').remove();
 }
