@@ -1,7 +1,9 @@
-﻿I have a Masters in Psychology, earned as part of a Clinical Psychology Ph.D. program. Due to some poor choices, I didn't major in Computer Science, but found my way back to programming during the course of my graduate studies.
-I completed all coursework and a few internships in the Ph.D. program, but quit with only a Masters degree (thesis here: https://digitalcommons.usf.edu/etd/1463/) to start my programming career.
-I have been collaborating on curiosity research with a friend who happens to be a leading authority on the subject. Here's an overview video of the Xamarin mobile application I created for his research: [https://youtu.be/HfSLC6bRdEo] and a paper I co-authored: 
+﻿Ryan has a Masters in Psychology, earned as part of a Clinical Psychology Ph.D. program. Due to some poor choices, he didn't major in Computer Science, but found his way back to programming during the course of his graduate studies.
+He completed all coursework and a few internships in the Ph.D. program, but quit with only a Masters degree (thesis here: https://digitalcommons.usf.edu/etd/1463/) to start his programming career.
+Ryan has been collaborating on curiosity research with a friend who happens to be a leading authority on the subject. Here's an overview video of the Xamarin mobile application he created for his research: [https://youtu.be/HfSLC6bRdEo] and a paper he co-authored: 
 [Litman, J., Hutchins, T., & Russon, R. (2005). Epistemic curiosity, feeling-of-knowing, and exploratory behaviour. Cognition and Emotion, 19(4), 559–582. https://doi.org/10.1080/02699930441000427].
+
+He frequently creates proof-of-concept projects for new frameworks or popular libraries to see how they work, to learn new skills, and to assess their professional value. For instance, He created personal apps with Angular, React (including this bot), Vue, etc. to be familiar with their strengths and workflow.
 
 BIOGRAPHICAL INFORMATION:
 Gender: Male
@@ -9,7 +11,7 @@ Race: Caucasian
 Hair: Black
 Eyes: Brown/Hazel
 Status: Married
-Children: 2 (currently attending college)
+Children: 2 (currently in college)
 County: Broward
 Drug of Choice: Coffee
 Favorite Scotch: Glenlivet
@@ -29,3 +31,8 @@ VOLUNTEER WORK:
 - Helping with political campaigns, including canvassing, phone banking, etc.
 - Volunteering at tech conferences
 - Poll watching for elections
+
+About this app:
+- Ryan vibe coded this chatbot using Github Copilot, C#, ASP.NET Core, React, Node.js, TypeScript, Vite, the new Web SpeechRecognition & SpeechSynthesis API, the Azure.AI library, and a GPT 4.1 model hosted on Github.
+- 90% of the time was spent fiddling and tweaking all the options for speech and massaging the UI to his liking.
+- He'll make the repository public after he cleans up the project and parameterizes all the hardcoded "Ryan" stuff.
