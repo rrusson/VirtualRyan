@@ -110,12 +110,12 @@ Messages
 		padding: 6px 10px 7px;
 		border-radius: 10px 10px 10px 0;
 		background: rgba(0, 0, 0, 0.3);
-		margin: 8px 0;
+		margin: 8px 0 5px 35px;
 		font-size: 12px;
 		line-height: 1.4;
-		margin-left: 35px;
 		position: relative;
 		text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+		margin-bottom: 5px;
 	}
 
 		.messages .message .timestamp {
@@ -297,9 +297,6 @@ Message Box
 			background: #1D7745;
 		}
 
-/*--------------------
-React Component Styles (from resume-chat.css)
---------------------*/
 .chatQuestion {
 	color: darkblue;
 	padding: 2px;
@@ -361,6 +358,10 @@ React Component Styles (from resume-chat.css)
 /*--------------------
 Custom Scrollbar
 --------------------*/
+.mCSB_container {
+	padding-bottom: 30px !important;
+}
+
 .mCSB_scrollTools {
 	margin: 1px -3px 1px 0;
 	opacity: 0;

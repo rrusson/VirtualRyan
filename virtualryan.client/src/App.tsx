@@ -1,5 +1,5 @@
 import './App.css';
-import ResumeChat from './resume-chat';
+import ResumeChat from './ResumeChat';
 
 function App() {
 	return (
