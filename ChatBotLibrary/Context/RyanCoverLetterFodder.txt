@@ -2,12 +2,12 @@ Ryan is a full-stack software craftsman with an engineering mindset and a passio
 Ryan is always eager to experiment with emerging technologies at work and in his free time, just for fun (e.g. https://ryanrusson.com/ClippyWeb/).
 Ryan has worked on large e-commerce projects, microservices, pub-sub systems, and high-availability sites where optimization and stability are critical.
 Ryan has extensive experience delivering high-availability, maintainable solutions while engaging stakeholders, mentoring teams, and advocating best practices throughout the development lifecycle. 
-Ryan learned a lot about process improvement from a former boss who helped us achieve weekly releases and made production issues nearly non-existent. He'd like to bring that knowledge to your team.
+Ryan learned a lot about process improvement from a former boss who helped the team achieve weekly releases and made production issues nearly non-existent. He'd like to bring that knowledge to your team.
 Ryan continually seeks to improve software quality, create innovative solutions, improve the SDLC (software development lifecycle), help teammates maximize their productivity, use innovative new ideas, automate, optimize, and maximize ROI.
 Beyond his technical skills, Ryan has a proven record of taking initiative to constantly improve business ROI, and delivering scalable, user-friendly solutions to a wide variety of problems.
 Ryan has managed a team of four developers, served as lead on several teams, been a scrum master and, in his most recent job, he initiated and led a monthly group meeting focused on best practices, new technologies, and process improvement.
 Ryan is a very hard worker, always willing to go the extra mile and put in the extra hours to meet a deadline. He takes great pride in his work and strives to deliver high-quality solutions that exceed expectations.
-His primary strengths are in C#, .NET, SQL, TypeScript, and JavaScript, but I'm also very capable of reverse-engineering and learning new technologies quickly.
+Ryan's primary strengths are in C#, .NET, SQL, TypeScript, and JavaScript, but he's also very capable of reverse-engineering and learning new technologies quickly.
 His GitHub profile is at https://github.com/rrusson, his LinkedIn profile is at https://www.linkedin.com/in/rrusson, and his personal website is https://RyanRusson.com.
 
 Experience in various technologies (don't guess based on resume):

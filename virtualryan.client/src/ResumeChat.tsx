@@ -1,25 +1,20 @@
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { SpeechToText } from './speechToText';
-import { TextToSpeech } from './textToSpeech';
-import { Pronunciation } from './pronunciation';
 import { type PersonConfig, defaultPersonConfig } from './personConfig';
-
-// Types for chat functionality
-interface ChatMessage {
-	id: string;
-	content: string;
-	isUser: boolean;
-	timestamp: Date;
-}
+import { useChat } from './hooks/useChat';
+import TextToSpeech from './textToSpeech';
+import { Pronunciation } from './pronunciation';
+import type {
+	ChatTitleProps,
+	ChatMessage,
+	MessageProps,
+	LoadingMessageProps,
+	MessagesDisplayProps,
+	MessageInputProps
+} from './types/interfaces';
 
 // ChatTitle Component
-interface ChatTitleProps {
-	isListening: boolean;
-	onMicClick: () => void;
-	personConfig: PersonConfig;
-}
-
 const ChatTitle: React.FC<ChatTitleProps> = ({ isListening, onMicClick, personConfig }) => {
 	return (
 		<div className="chat-title">
@@ -44,13 +39,7 @@ const ChatTitle: React.FC<ChatTitleProps> = ({ isListening, onMicClick, personCo
 	);
 };
 
-// Message Component - Fixed to match original jQuery structure
-interface MessageProps {
-	message: ChatMessage;
-	showTimestamp: boolean;
-	personConfig: PersonConfig;
-}
-
+// Message Component
 const Message: React.FC<MessageProps> = ({ message, showTimestamp, personConfig }) => {
 	const formatTime = (date: Date) => {
 		return String(date.getHours()).padStart(2, '0') + ':' + String(date.getMinutes()).padStart(2, '0');
@@ -72,10 +61,6 @@ const Message: React.FC<MessageProps> = ({ message, showTimestamp, personConfig 
 };
 
 // Loading Message Component
-interface LoadingMessageProps {
-	personConfig: PersonConfig;
-}
-
 const LoadingMessage: React.FC<LoadingMessageProps> = ({ personConfig }) => {
 	return (
 		<div className="message loading new">
@@ -88,12 +73,6 @@ const LoadingMessage: React.FC<LoadingMessageProps> = ({ personConfig }) => {
 };
 
 // Messages Display Component
-interface MessagesDisplayProps {
-	messages: ChatMessage[];
-	isLoading: boolean;
-	personConfig: PersonConfig;
-}
-
 const MessagesDisplay: React.FC<MessagesDisplayProps> = ({ messages, isLoading, personConfig }) => {
 	const messagesContentRef = useRef<HTMLDivElement>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -189,14 +168,6 @@ const MessagesDisplay: React.FC<MessagesDisplayProps> = ({ messages, isLoading, 
 };
 
 // Message Input Component
-interface MessageInputProps {
-	value: string;
-	onChange: (value: string) => void;
-	onSubmit: (message: string) => void;
-	isLoading: boolean;
-	personConfig: PersonConfig;
-}
-
 const MessageInput: React.FC<MessageInputProps> = ({ value, onChange, onSubmit, isLoading, personConfig }) => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -253,20 +224,24 @@ const MessageInput: React.FC<MessageInputProps> = ({ value, onChange, onSubmit, 
 // Main ResumeChat Component
 function ResumeChat() {
 	const [chatQuestion, setChatQuestion] = useState<string>('');
-	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [isListening, setIsListening] = useState<boolean>(false);
-	const [wasLastInputSpeech, setLastInputWasSpeech] = useState<boolean>(false);
 	const [personConfig] = useState<PersonConfig>(defaultPersonConfig);
 
 	const speechToTextRef = useRef<SpeechToText | null>(null);
-	const textToSpeechRef = useRef<TextToSpeech | null>(null);
-	const pronunciationRef = useRef<Pronunciation | null>(null);
+	const {
+		messages,
+		setMessages,
+		addChatMessage,
+		speakBotResponse,
+		textToSpeechRef,
+		pronunciationRef
+	} = useChat();
 
 	// Initialize TTS and Pronunciation instance, and add welcome message
 	useEffect(() => {
-		textToSpeechRef.current = new TextToSpeech();
-		pronunciationRef.current = new Pronunciation();
+		if (!textToSpeechRef.current) textToSpeechRef.current = new TextToSpeech();
+		if (!pronunciationRef.current) pronunciationRef.current = new Pronunciation();
 
 		const welcomeMessage: ChatMessage = {
 			id: 'welcome-' + Date.now(),
@@ -275,40 +250,8 @@ function ResumeChat() {
 			timestamp: new Date()
 		};
 		setMessages([welcomeMessage]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [personConfig.welcomeMsg]);
-
-	const addChatMessage = (content: string, isUser: boolean): ChatMessage => {
-		const message: ChatMessage = {
-			id: (isUser ? 'user-' : 'bot-') + Date.now(),
-			content,
-			isUser,
-			timestamp: new Date()
-		};
-		setMessages(prev => [...prev, message]);
-		return message;
-	};
-
-	const speakBotResponse = (text: string) => {
-		if (textToSpeechRef.current) {
-			try {
-				// Stop any current speech before starting new one
-				textToSpeechRef.current.stop();
-
-				// Use phonetic text for TTS, but original for chat
-				const phoneticText = pronunciationRef.current
-					? pronunciationRef.current.makeTlasPhonetic(text)
-					: text;
-
-				textToSpeechRef.current.speak(phoneticText, {
-					rate: 0.9,
-					pitch: 1.0,
-					volume: 0.8
-				});
-			} catch (error) {
-				console.error('Error converting text to speech:', error);
-			}
-		}
-	};
 
 	const handleMicClick = async () => {
 		if (isListening) {
@@ -325,33 +268,24 @@ function ResumeChat() {
 
 			// Set up callbacks
 			stt.onStart = () => {
-				console.log('Speech recognition started');
 				setIsListening(true);
 			};
 
 			stt.onEnd = () => {
-				console.log('Speech recognition ended');
 				setIsListening(false);
 			};
 
 			stt.onError = (error: string) => {
-				console.error('Speech recognition error:', error);
 				setIsListening(false);
-				setLastInputWasSpeech(false);
-
 				addChatMessage(`Speech recognition error: ${error}`, false);
 			};
 
 			stt.onResult = (transcript: string) => {
-				console.log('Speech transcript received:', transcript);
-
 				if (transcript && transcript.trim()) {
-					setLastInputWasSpeech(true);
 					setChatQuestion(transcript.trim());
-
 					setTimeout(() => {
 						textToSpeechRef.current?.stop();
-						handleSubmitQuestion(transcript.trim());
+						handleSubmitQuestion(transcript.trim(), true);
 					}, 100);
 				}
 			};
@@ -359,31 +293,21 @@ function ResumeChat() {
 			stt.listen();
 
 		} catch (error) {
-			console.error('Error initializing speech recognition:', error);
 			setIsListening(false);
-			setLastInputWasSpeech(false);
-
 			addChatMessage('Speech recognition is not supported in this browser or an error occurred.', false);
 		}
 	};
 
-	const handleSubmitQuestion = async (questionToSubmit?: string) => {
+	const handleSubmitQuestion = async (questionToSubmit?: string, wasInputSpeech: boolean = false) => {
 		const question = questionToSubmit || chatQuestion;
 
 		if (!question.trim()) {
-			console.log('No question entered.');
 			return;
 		}
 
 		addChatMessage(question, true);
-
 		setLoading(true);
-		const wasInputSpeech = wasLastInputSpeech;
 		setChatQuestion('');
-
-		if (!wasInputSpeech) {
-			setLastInputWasSpeech(false);
-		}
 
 		try {
 			const response = await fetch('/Chat/AskQuestion', {
@@ -396,25 +320,16 @@ function ResumeChat() {
 
 			if (response.ok) {
 				const result = await response.text();
-
 				addChatMessage(result, false);
-
 				if (wasInputSpeech) {
 					speakBotResponse(result);
-					setLastInputWasSpeech(false);
 				}
 			} else {
 				const errorText = await response.text();
-				console.error('HTTP error:', errorText);
-
 				addChatMessage('Error getting response: ' + errorText, false);
-				setLastInputWasSpeech(false);
 			}
 		} catch (error) {
-			console.error('Fetch error:', error);
-
 			addChatMessage('Error getting response: ' + error, false);
-			setLastInputWasSpeech(false);
 		} finally {
 			setLoading(false);
 		}
@@ -422,10 +337,6 @@ function ResumeChat() {
 
 	const handleInputChange = (value: string) => {
 		setChatQuestion(value);
-
-		if (!isListening) {
-			setLastInputWasSpeech(false);
-		}
 	};
 
 	return (
