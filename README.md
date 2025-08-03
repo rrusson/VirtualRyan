@@ -14,10 +14,12 @@ https://codepen.io/supah/pen/jqOBqp by Fabio Ottaviani
 # INSTALLATION
 1. Clone the repository:
    ```bash
-   git clone
+   git clone https://github.com/rrusson/VirtualRyan.git
 2. Install dependencies:
    ```bash
    npm install
-3. Set a system environment variable for your `GITHUB_TOKEN`
-4. Replace files in the `ChatbotLibrary\Context` folder with your own resume, bio, etc.
-5. Replace instances of "Ryan" in the code with your name (especially the system prompt in `RyanChat.cs`). TODO: create list and parameterize as much as possible.
+3. Set up a `GITHUB_TOKEN` for your account, if you don't have one.    
+    - Go to https://github.com/marketplace/models/azure-openai/gpt-4-1 and click the green _"Use this model"_ button to get started.
+    - More information about tokens [here](https://docs.github.com/en/actions/tutorials/authenticate-with-github_token).
+4. Set a system environment variable for your `GITHUB_TOKEN` ([instructions for Windows 10](https://www.wikihow.com/Create-an-Environment-Variable-in-Windows-10))
+5. Follow the [customization guide](CUSTOMIZATION.md) to personalize the application

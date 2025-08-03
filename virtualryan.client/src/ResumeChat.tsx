@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { SpeechToText } from './speechToText';
 import { TextToSpeech } from './textToSpeech';
 import { Pronunciation } from './pronunciation';
+import { type PersonConfig, defaultPersonConfig } from './personConfig';
 
 // Types for chat functionality
 interface ChatMessage {
@@ -16,15 +17,16 @@ interface ChatMessage {
 interface ChatTitleProps {
 	isListening: boolean;
 	onMicClick: () => void;
+	personConfig: PersonConfig;
 }
 
-const ChatTitle: React.FC<ChatTitleProps> = ({ isListening, onMicClick }) => {
+const ChatTitle: React.FC<ChatTitleProps> = ({ isListening, onMicClick, personConfig }) => {
 	return (
 		<div className="chat-title">
 			<h1>Resume Bot</h1>
-			<h2>Rep. Ryan Russon</h2>
+			<h2>{personConfig.subtitle}</h2>
 			<figure className="avatar">
-				<img src="https://avatars.githubusercontent.com/u/653188?v=4" alt="avatar" />
+				<img src={personConfig.avatarUrl} alt="avatar" />
 			</figure>
 			<button
 				className="mic-button"
@@ -46,9 +48,10 @@ const ChatTitle: React.FC<ChatTitleProps> = ({ isListening, onMicClick }) => {
 interface MessageProps {
 	message: ChatMessage;
 	showTimestamp: boolean;
+	personConfig: PersonConfig;
 }
 
-const Message: React.FC<MessageProps> = ({ message, showTimestamp }) => {
+const Message: React.FC<MessageProps> = ({ message, showTimestamp, personConfig }) => {
 	const formatTime = (date: Date) => {
 		return String(date.getHours()).padStart(2, '0') + ':' + String(date.getMinutes()).padStart(2, '0');
 	};
@@ -57,7 +60,7 @@ const Message: React.FC<MessageProps> = ({ message, showTimestamp }) => {
 		<div className={`message ${message.isUser ? 'message-personal ' : ''}new`} data-id={message.id}>
 			{!message.isUser && (
 				<figure className="avatar">
-					<img src="https://avatars.githubusercontent.com/u/653188?v=4" alt="avatar" />
+					<img src={personConfig.avatarUrl} alt="avatar" />
 				</figure>
 			)}
 			{message.content}
@@ -69,11 +72,15 @@ const Message: React.FC<MessageProps> = ({ message, showTimestamp }) => {
 };
 
 // Loading Message Component
-const LoadingMessage: React.FC = () => {
+interface LoadingMessageProps {
+	personConfig: PersonConfig;
+}
+
+const LoadingMessage: React.FC<LoadingMessageProps> = ({ personConfig }) => {
 	return (
 		<div className="message loading new">
 			<figure className="avatar">
-				<img src="https://avatars.githubusercontent.com/u/653188?v=4" alt="avatar" />
+				<img src={personConfig.avatarUrl} alt="avatar" />
 			</figure>
 			<span></span>
 		</div>
@@ -84,9 +91,10 @@ const LoadingMessage: React.FC = () => {
 interface MessagesDisplayProps {
 	messages: ChatMessage[];
 	isLoading: boolean;
+	personConfig: PersonConfig;
 }
 
-const MessagesDisplay: React.FC<MessagesDisplayProps> = ({ messages, isLoading }) => {
+const MessagesDisplay: React.FC<MessagesDisplayProps> = ({ messages, isLoading, personConfig }) => {
 	const messagesContentRef = useRef<HTMLDivElement>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -170,9 +178,9 @@ const MessagesDisplay: React.FC<MessagesDisplayProps> = ({ messages, isLoading }
 			<div className="messages-content" ref={messagesContentRef}>
 				<div className="mCSB_container">
 					{getMessagesWithTimestamps().map(({ message, showTimestamp }) => (
-						<Message key={message.id} message={message} showTimestamp={showTimestamp} />
+						<Message key={message.id} message={message} showTimestamp={showTimestamp} personConfig={personConfig} />
 					))}
-					{isLoading && <LoadingMessage />}
+					{isLoading && <LoadingMessage personConfig={personConfig} />}
 					<div ref={messagesEndRef} />
 				</div>
 			</div>
@@ -186,9 +194,10 @@ interface MessageInputProps {
 	onChange: (value: string) => void;
 	onSubmit: (message: string) => void;
 	isLoading: boolean;
+	personConfig: PersonConfig;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ value, onChange, onSubmit, isLoading }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ value, onChange, onSubmit, isLoading, personConfig }) => {
 	const formRef = useRef<HTMLFormElement>(null);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -231,7 +240,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ value, onChange, onSubmit, 
 					name="chatQuestion"
 					rows={8}
 					cols={80}
-					placeholder="Ask a question about Ryan's resume..."
+					placeholder={`Ask a question about ${personConfig.firstName}'s resume...`}
 				/>
 				<button type="submit" className="message-submit" disabled={isLoading || !value.trim()}>
 					Send
@@ -248,6 +257,7 @@ function ResumeChat() {
 	const [loading, setLoading] = useState<boolean>(false);
 	const [isListening, setIsListening] = useState<boolean>(false);
 	const [wasLastInputSpeech, setLastInputWasSpeech] = useState<boolean>(false);
+	const [personConfig] = useState<PersonConfig>(defaultPersonConfig);
 
 	const speechToTextRef = useRef<SpeechToText | null>(null);
 	const textToSpeechRef = useRef<TextToSpeech | null>(null);
@@ -260,12 +270,12 @@ function ResumeChat() {
 
 		const welcomeMessage: ChatMessage = {
 			id: 'welcome-' + Date.now(),
-			content: "Hi! I'm a bot that answers questions about Ryan Russon's resume and qualifications. What would you like to know?",
+			content: personConfig.welcomeMsg,
 			isUser: false,
 			timestamp: new Date()
 		};
 		setMessages([welcomeMessage]);
-	}, []);
+	}, [personConfig.welcomeMsg]);
 
 	const addChatMessage = (content: string, isUser: boolean): ChatMessage => {
 		const message: ChatMessage = {
@@ -337,7 +347,6 @@ function ResumeChat() {
 
 				if (transcript && transcript.trim()) {
 					setLastInputWasSpeech(true);
-					// Set the transcript in the input field
 					setChatQuestion(transcript.trim());
 
 					setTimeout(() => {
@@ -421,13 +430,14 @@ function ResumeChat() {
 
 	return (
 		<div className="chat">
-			<ChatTitle isListening={isListening} onMicClick={handleMicClick} />
-			<MessagesDisplay messages={messages} isLoading={loading} />
+			<ChatTitle isListening={isListening} onMicClick={handleMicClick} personConfig={personConfig} />
+			<MessagesDisplay messages={messages} isLoading={loading} personConfig={personConfig} />
 			<MessageInput
 				value={chatQuestion}
 				onChange={handleInputChange}
 				onSubmit={handleSubmitQuestion}
 				isLoading={loading}
+				personConfig={personConfig}
 			/>
 		</div>
 	);

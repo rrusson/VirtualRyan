@@ -9,10 +9,12 @@ namespace VirtualRyan.Server.Controllers
 	public class ChatController : ControllerBase
 	{
 		private readonly ILogger<ChatController> _logger;
+		private readonly IConfiguration _configuration;
 
-		public ChatController(ILogger<ChatController> logger)
+		public ChatController(ILogger<ChatController> logger, IConfiguration configuration)
 		{
 			_logger = logger;
+			_configuration = configuration;
 			_logger.LogInformation("ChatController initialized");
 		}
 
@@ -30,12 +32,15 @@ namespace VirtualRyan.Server.Controllers
 				throw new ArgumentException("Question cannot be null or empty.", nameof(request.Question));
 			}
 
-			_logger.LogInformation("RECEIVED QUESTION: {Question}", request.Question);
+			var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
+			_logger.LogInformation("{ip} RECEIVED QUESTION: {Question}", ip, request.Question);
 
 			try
 			{
-				RyanChat chatClient = new RyanChat();
+				string systemPrompt = _configuration["SystemPrompt"] ?? string.Empty;
+				RyanChat chatClient = new RyanChat(systemPrompt);
 				string response = await chatClient.AskQuestionAsync([request.Question]).ConfigureAwait(false);
+
 				_logger.LogInformation("RETURNING RESPONSE: {Response}", response);
 
 				return response;
