@@ -20,6 +20,7 @@ https://codepen.io/supah/pen/jqOBqp by Fabio Ottaviani
    npm install
 3. Set up a `GITHUB_TOKEN` for your account, if you don't have one.    
     - Go to https://github.com/marketplace/models/azure-openai/gpt-4-1 and click the green _"Use this model"_ button to get started.
+    - The token must include the `models:read` permission for a fine-grained Personal Access Token or use a Classic token with repo scope.
     - More information about tokens [here](https://docs.github.com/en/actions/tutorials/authenticate-with-github_token).
 4. Set a system environment variable for your `GITHUB_TOKEN` ([instructions for Windows 10](https://www.wikihow.com/Create-an-Environment-Variable-in-Windows-10))
 5. Follow the [customization guide](CUSTOMIZATION.md) to personalize the application
