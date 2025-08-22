@@ -17,6 +17,7 @@ namespace VirtualRyan.Server
 			// Add services to the container.
 			builder.Services.AddControllers();
 			builder.Services.AddOpenApi();
+			builder.Services.Configure<Controllers.A2ASettings>(builder.Configuration.GetSection("A2ASettings"));
 
 			var app = builder.Build();
 

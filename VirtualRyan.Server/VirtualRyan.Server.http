@@ -1,9 +1,11 @@
 @VirtualRyan.Server_HostAddress = http://localhost:5074
 
-POST {{VirtualRyan.Server_HostAddress}}/chat/AskQuestion/
+
+### A2A API Test
+POST {{VirtualRyan.Server_HostAddress}}/api/a2a/ask
 Content-Type: application/json
 Accept: application/json
 {
-  "question": "What is the meaning of life?"
+  "question": "What is your name?"
 }
 ###
