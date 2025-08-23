@@ -1,4 +1,8 @@
+using A2A;
+using A2A.AspNetCore;
+
 using VirtualRyan.Server.Logging;
+using VirtualRyan.Server.Services;
 
 namespace VirtualRyan.Server
 {
@@ -14,11 +18,23 @@ namespace VirtualRyan.Server
 			builder.Logging.AddConsole();
 			builder.Logging.AddFileLogger(GetLogPath(isDev));
 
-			// Add services to the container.
+			// Add services to the container
 			builder.Services.AddControllers();
 			builder.Services.AddOpenApi();
+			builder.Services.AddScoped<A2AService>();
 
-			var app = builder.Build();
+			// Add CORS for A2A clients if needed
+			builder.Services.AddCors(options =>
+			{
+				options.AddPolicy("A2APolicy", policy =>
+				{
+					policy.AllowAnyOrigin()
+					.AllowAnyMethod()
+					.AllowAnyHeader();
+				});
+			});
+
+			WebApplication app = builder.Build();
 
 			app.UseDefaultFiles();
 			app.MapStaticAssets();
@@ -26,7 +42,18 @@ namespace VirtualRyan.Server
 			if (isDev)
 			{
 				app.MapOpenApi();
+				app.UseCors("A2APolicy");
 			}
+
+			// From A2A dox:
+			var taskManager = new TaskManager();
+			using (var scope = app.Services.CreateScope())
+			{
+				var agent = scope.ServiceProvider.GetRequiredService<A2AService>();
+				agent.Attach(taskManager);
+			}
+			app.MapA2A(taskManager, "/ask");
+			app.MapHttpA2A(taskManager, "/ask");
 
 			app.UseHttpsRedirection();
 			app.UseAuthorization();
