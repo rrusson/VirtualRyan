@@ -1,6 +1,6 @@
 @VirtualRyan.Server_HostAddress = http://localhost:5074
 
-# Standard Agent Test - Ask Question
+# Standard Controller Test - Ask Question
 POST {{VirtualRyan.Server_HostAddress}}/chat/AskQuestion/
 Content-Type: application/json
 Accept: application/json
@@ -9,12 +9,12 @@ Accept: application/json
 }
 ###
 
-# A2A Agent Test - Get Agent Card (A2A CardResolver pattern)
+# A2A - Get Agent Card Test
 GET {{VirtualRyan.Server_HostAddress}}/.well-known/agent.json
 ###
 
-# VirtualRyan Agent Test - Ask Question
-POST {{VirtualRyan.Server_HostAddress}}/ask
+# A2A VirtualRyan Agent Test - Ask Question
+POST {{VirtualRyan.Server_HostAddress}}/a2a
 Content-Type: application/json
 Accept: application/json
 {
@@ -37,3 +37,18 @@ Accept: application/json
 }
 ###
 
+# Basic A2A Agent Test - Get Agent Card
+GET https://hello.a2aregistry.org/.well-known/agent-card.json
+###
+
+# Basic A2A Agent Test - Hello World
+POST https://hello.a2aregistry.org/a2a
+Content-Type: application/json
+Accept: application/json
+{
+  "jsonrpc": "2.0",
+  "method": "hello",
+  "params": {},
+  "id": 42
+}
+###

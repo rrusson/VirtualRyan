@@ -22,6 +22,7 @@ namespace VirtualRyan.Server
 			builder.Services.AddControllers();
 			builder.Services.AddOpenApi();
 			builder.Services.AddScoped<A2AService>();
+			builder.Services.AddHttpContextAccessor();
 
 			// Add CORS for A2A clients if needed
 			builder.Services.AddCors(options =>
@@ -52,8 +53,8 @@ namespace VirtualRyan.Server
 				var agent = scope.ServiceProvider.GetRequiredService<A2AService>();
 				agent.Attach(taskManager);
 			}
-			app.MapA2A(taskManager, "/ask");
-			app.MapHttpA2A(taskManager, "/ask");
+			app.MapA2A(taskManager, "/a2a");
+			app.MapHttpA2A(taskManager, "/a2a");
 
 			app.UseHttpsRedirection();
 			app.UseAuthorization();

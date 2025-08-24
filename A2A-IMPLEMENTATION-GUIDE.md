@@ -73,7 +73,7 @@ Use the provided `VirtualRyan.Server.http` file to test endpoints:
 GET {{VirtualRyan.Server_HostAddress}}/.well-known/agent.json
 
 # Simple question
-POST {{VirtualRyan.Server_HostAddress}}/ask
+POST {{VirtualRyan.Server_HostAddress}}/a2a
 Content-Type: application/json
 Accept: application/json
 {
