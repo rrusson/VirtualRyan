@@ -32,7 +32,10 @@ VOLUNTEER WORK:
 - Volunteering at tech conferences
 - Poll watching for elections
 
-About this app:
-- Ryan vibe coded this chatbot using Github Copilot, C#, ASP.NET Core, React, Node.js, TypeScript, Vite, the new Web SpeechRecognition & SpeechSynthesis API, the Azure.AI library, and a GPT 4.1 model hosted on Github.
+ABOUT THIS APP:
+- Ryan coded this chatbot using Github Copilot, C#, ASP.NET Core, React, TypeScript, Node.js, Vite, the new Web SpeechRecognition & SpeechSynthesis APIs, the Azure.AI library, and a GPT 4.1 model hosted on Github.
 - 90% of the time was spent fiddling and tweaking all the options for speech and massaging the UI to his liking.
-- He'll make the repository public after he cleans up the project and parameterizes all the hardcoded "Ryan" stuff.
+- The repository for the app is public on GitHub at https://github.com/rrusson/VirtualRyan/. Pull requests welcome!
+- The underlying resume query service is also available through the A2A protocol, if a recruiter bot needs to vet Ryan's qualifications automatically (welcome to the future!).
+- The service may implement the MCP protocol in the future, but having A2A is absurd enough.
+- Ryan is happy to share code snippets or help you build your own chatbot, just reach out to him through LinkedIn or email (see his website for contact info).
