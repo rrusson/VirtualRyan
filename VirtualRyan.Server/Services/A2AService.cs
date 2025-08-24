@@ -194,14 +194,15 @@ namespace VirtualRyan.Server.Services
 		/// <returns>AgentCard for the host</returns>
 		private async Task<AgentCard> GetAgentCard(string hostUri, CancellationToken cancellationToken)
 		{
+			string sanitizedHostUri = SanitizeForLog(hostUri);
 			if (_agentCardCache.TryGetValue(hostUri, out var cachedCard) && !cachedCard.IsExpired())
 			{
-				_logger.LogDebug("A2A: Using cached agent card for host: {Host}", hostUri);
+				_logger.LogDebug("A2A: Using cached agent card for host: {Host}", sanitizedHostUri);
 				return cachedCard.AgentCard;
 			}
 
 			// Not in cache or expired, fetch
-			_logger.LogDebug("A2A: Fetching agent card for host: {Host}", hostUri);
+			_logger.LogDebug("A2A: Fetching agent card for host: {Host}", sanitizedHostUri);
 			var resolver = new A2ACardResolver(new Uri(hostUri));
 			AgentCard requesterCard = await resolver.GetAgentCardAsync(cancellationToken).ConfigureAwait(false);
 			requesterCard.Name ??= "unknown";
@@ -240,6 +241,20 @@ namespace VirtualRyan.Server.Services
 			}
 
 			return IPAddress.IsLoopback(remoteIp) || remoteIp.Equals(localIp);
+		}
+
+		/// <summary>
+		/// Sanitizes a string for safe logging by removing control characters, especially newlines.
+		/// </summary>
+		private static string SanitizeForLog(string input)
+		{
+			if (input == null)
+			{
+				return string.Empty;
+			}
+
+			// Remove carriage return, linefeeds, and other control characters
+			return string.Concat(input.Where(c => !char.IsControl(c) || c == '\t'));
 		}
 	}
 }
