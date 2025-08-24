@@ -2,6 +2,7 @@ using A2A;
 using A2A.AspNetCore;
 
 using VirtualRyan.Server.Logging;
+using VirtualRyan.Server.Middleware;
 using VirtualRyan.Server.Services;
 
 namespace VirtualRyan.Server
@@ -21,6 +22,7 @@ namespace VirtualRyan.Server
 			// Add services to the container
 			builder.Services.AddControllers();
 			builder.Services.AddOpenApi();
+			builder.Services.AddSingleton<RateLimitingService>();
 			builder.Services.AddScoped<A2AService>();
 			builder.Services.AddHttpContextAccessor();
 
@@ -46,7 +48,9 @@ namespace VirtualRyan.Server
 				app.UseCors("A2APolicy");
 			}
 
-			// From A2A dox:
+			app.UseRateLimiting();
+
+			// A2A setup
 			var taskManager = new TaskManager();
 			using (var scope = app.Services.CreateScope())
 			{

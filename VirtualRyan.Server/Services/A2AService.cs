@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net;
 
 using A2A;
@@ -9,26 +10,37 @@ namespace VirtualRyan.Server.Services
 	/// <summary>
 	/// Service for handling A2A (Application-to-Application) communication with VirtualRyan
 	/// </summary>
-	public class A2AService
+	public partial class A2AService
 	{
 		private readonly ILogger<A2AService> _logger;
 		private readonly IConfiguration _configuration;
 		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly RateLimitingService _rateLimitingService;
+
+		// Cache for storing AgentCard information by hostname
+		private readonly ConcurrentDictionary<string, CachedAgentCard> _agentCardCache = new();
+		private readonly TimeSpan _cacheExpirationTime = TimeSpan.FromMinutes(5);
 
 		public A2AService(
 			ILogger<A2AService> logger,
 			IConfiguration configuration,
-			IHttpContextAccessor httpContextAccessor)
+			IHttpContextAccessor httpContextAccessor,
+			RateLimitingService rateLimitingService)
 		{
 			_logger = logger;
 			_configuration = configuration;
 			_httpContextAccessor = httpContextAccessor;
+			_rateLimitingService = rateLimitingService;
 		}
 
+		/// <summary>
+		/// Assigns the A2A handlers to the given TaskManager
+		/// </summary>
+		/// <param name="taskManager">TaskManager triggering A2AService events</param>
 		public void Attach(ITaskManager taskManager)
 		{
-			taskManager.OnMessageReceived = ProcessMessageAsync;
 			taskManager.OnAgentCardQuery = GetAgentCardAsync;
+			taskManager.OnMessageReceived = ProcessMessageAsync;
 		}
 
 		/// <summary>
@@ -140,7 +152,6 @@ namespace VirtualRyan.Server.Services
 			});
 		}
 
-
 		/// <summary>
 		/// Attempts to resolve the caller's agent card from the HTTP context host information
 		/// </summary>
@@ -152,27 +163,70 @@ namespace VirtualRyan.Server.Services
 			{
 				var httpContext = _httpContextAccessor.HttpContext;
 				string remoteIp = httpContext?.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-				string? host = httpContext?.Request?.Host.Value ?? "unknown";
+				string scheme = httpContext?.Request?.Scheme ?? "https";
+				string host = httpContext?.Request?.Host.Value ?? "unknown";
 
-				if (IsLocalRequest(httpContext) || host.StartsWith("localhost"))
+				if (host == "unknown" || IsLocalRequest(httpContext) || host.StartsWith("localhost"))
 				{
-					// Local request, infinite loops are not fun
+					//No local requests; infinite loops are not fun
 					return null;
 				}
 
-				var resolver = new A2ACardResolver(new Uri($"{host}/.well-known/agent.json"));
-				AgentCard requesterCard = await resolver.GetAgentCardAsync(cancellationToken).ConfigureAwait(false);
-				requesterCard.Name ??= "unknown";
-				requesterCard.Description ??= "No description provided";
-				_logger.LogInformation("A2A: Request from {Caller} ({Desc}) at {RemoteIp} ({Host})", requesterCard.Name, requesterCard.Description, remoteIp, host);
+				AgentCard requesterCard = await GetAgentCard($"{scheme}://{host}", cancellationToken).ConfigureAwait(false);
+
+				var rateLimitInformation = _rateLimitingService.GetRateLimitInfo(remoteIp);
+				LogAgentRequest(requesterCard, remoteIp, host, rateLimitInformation);
 
 				return requesterCard;
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Trying to get the A2A caller went sideways.");
+				_logger.LogError(ex, "Trying to get A2A caller info went sideways.");
 				return null;
 			}
+		}
+
+		/// <summary>
+		/// Gets the AgentCard for a given host, using a cached version if available
+		/// </summary>
+		/// <param name="hostUri">host to attempt to fetch AgentCard from</param>
+		/// <param name="cancellationToken"></param>
+		/// <returns>AgentCard for the host</returns>
+		private async Task<AgentCard> GetAgentCard(string hostUri, CancellationToken cancellationToken)
+		{
+			if (_agentCardCache.TryGetValue(hostUri, out var cachedCard) && !cachedCard.IsExpired())
+			{
+				_logger.LogDebug("A2A: Using cached agent card for host: {Host}", hostUri);
+				return cachedCard.AgentCard;
+			}
+
+			// Not in cache or expired, fetch
+			_logger.LogDebug("A2A: Fetching agent card for host: {Host}", hostUri);
+			var resolver = new A2ACardResolver(new Uri(hostUri));
+			AgentCard requesterCard = await resolver.GetAgentCardAsync(cancellationToken).ConfigureAwait(false);
+			requesterCard.Name ??= "unknown";
+			requesterCard.Description ??= "No description provided";
+
+			_agentCardCache[hostUri] = new CachedAgentCard(requesterCard, DateTime.UtcNow.Add(_cacheExpirationTime));
+			return requesterCard;
+		}
+
+		/// <summary>
+		/// Logs information about an agent request including rate limit details
+		/// </summary>
+		private void LogAgentRequest(AgentCard agentCard, string remoteIp, string host, RateLimitInfo rateLimitInfo)
+		{
+			_logger.LogInformation(
+				"A2A: Request from {Caller} ({Desc}) at {RemoteIp} ({Host})\r\nA2A: Rate limits: {PerMinuteRemaining}/{PerMinuteLimit} per minute, {PerDayRemaining}/{PerDayLimit} per day",
+				agentCard.Name,
+				agentCard.Description,
+				remoteIp,
+				host,
+				rateLimitInfo.PerMinuteRemaining,
+				rateLimitInfo.PerMinuteLimit,
+				rateLimitInfo.PerDayRemaining,
+				rateLimitInfo.PerDayLimit
+			);
 		}
 
 		private static bool IsLocalRequest(HttpContext? context)
