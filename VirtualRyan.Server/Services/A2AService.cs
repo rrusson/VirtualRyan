@@ -253,8 +253,8 @@ namespace VirtualRyan.Server.Services
 				return string.Empty;
 			}
 
-			// Remove carriage return, linefeeds, and other control characters
-			return string.Concat(input.Where(c => !char.IsControl(c) || c == '\t'));
+			// Remove carriage return, linefeeds, tab characters, and other control characters
+			return string.Concat(input.Where(c => !char.IsControl(c)));
 		}
 	}
 }
