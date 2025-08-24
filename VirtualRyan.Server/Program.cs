@@ -1,4 +1,9 @@
+using A2A;
+using A2A.AspNetCore;
+
 using VirtualRyan.Server.Logging;
+using VirtualRyan.Server.Middleware;
+using VirtualRyan.Server.Services;
 
 namespace VirtualRyan.Server
 {
@@ -14,11 +19,25 @@ namespace VirtualRyan.Server
 			builder.Logging.AddConsole();
 			builder.Logging.AddFileLogger(GetLogPath(isDev));
 
-			// Add services to the container.
+			// Add services to the container
 			builder.Services.AddControllers();
 			builder.Services.AddOpenApi();
+			builder.Services.AddSingleton<RateLimitingService>();
+			builder.Services.AddScoped<A2AService>();
+			builder.Services.AddHttpContextAccessor();
 
-			var app = builder.Build();
+			// Add CORS for A2A clients if needed
+			builder.Services.AddCors(options =>
+			{
+				options.AddPolicy("A2APolicy", policy =>
+				{
+					policy.AllowAnyOrigin()
+					.AllowAnyMethod()
+					.AllowAnyHeader();
+				});
+			});
+
+			WebApplication app = builder.Build();
 
 			app.UseDefaultFiles();
 			app.MapStaticAssets();
@@ -26,7 +45,20 @@ namespace VirtualRyan.Server
 			if (isDev)
 			{
 				app.MapOpenApi();
+				app.UseCors("A2APolicy");
 			}
+
+			app.UseRateLimiting();
+
+			// A2A setup
+			var taskManager = new TaskManager();
+			using (var scope = app.Services.CreateScope())
+			{
+				var agent = scope.ServiceProvider.GetRequiredService<A2AService>();
+				agent.Attach(taskManager);
+			}
+			app.MapA2A(taskManager, "/a2a");
+			app.MapHttpA2A(taskManager, "/a2a");
 
 			app.UseHttpsRedirection();
 			app.UseAuthorization();

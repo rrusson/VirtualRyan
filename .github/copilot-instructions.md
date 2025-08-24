@@ -1,4 +1,4 @@
-- Always leave a CRLF between functions and observe other StyleCop formatting best practices.
+- Always leave a vertical space between functions and observe other StyleCop formatting best practices.
 - Start the names of any global private fields in a class with an underscore.
 - Make sure all async method calls include .ConfigureAwait()
 - When creating unit tests, use the MS Test framework. If mocking is needed, use MOQ, and Autofac.Extras.Moq, with AutoMock.GetLoose for dependency injection. Use Mock.Setup() for behaviors affected by each unit test.

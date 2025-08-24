@@ -1,9 +1,54 @@
 @VirtualRyan.Server_HostAddress = http://localhost:5074
 
+# Standard Controller Test - Ask Question
 POST {{VirtualRyan.Server_HostAddress}}/chat/AskQuestion/
 Content-Type: application/json
 Accept: application/json
 {
   "question": "What is the meaning of life?"
+}
+###
+
+# A2A - Get Agent Card Test
+GET {{VirtualRyan.Server_HostAddress}}/.well-known/agent.json
+###
+
+# A2A VirtualRyan Agent Test - Ask Question
+POST {{VirtualRyan.Server_HostAddress}}/a2a
+Content-Type: application/json
+Accept: application/json
+{
+  "jsonrpc": "2.0",
+  "method": "message/send",
+  "id": "test-001",
+  "params": {
+    "message": {
+      "role": "user",
+      "messageId": "test-msg-001",
+      "contextId": "test-context",
+      "parts": [
+        {
+          "kind":"text",
+          "text": "What experience does Ryan have with AI?"
+        }
+      ]
+    }
+  }
+}
+###
+
+# Basic A2A Agent Test - Get Agent Card
+GET https://hello.a2aregistry.org/.well-known/agent-card.json
+###
+
+# Basic A2A Agent Test - Hello World
+POST https://hello.a2aregistry.org/a2a
+Content-Type: application/json
+Accept: application/json
+{
+  "jsonrpc": "2.0",
+  "method": "hello",
+  "params": {},
+  "id": 42
 }
 ###

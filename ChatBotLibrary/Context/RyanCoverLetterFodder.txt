@@ -10,6 +10,12 @@ Ryan is a very hard worker, always willing to go the extra mile and put in the e
 Ryan's primary strengths are in C#, .NET, SQL, TypeScript, and JavaScript, but he's also very capable of reverse-engineering and learning new technologies quickly.
 His GitHub profile is at https://github.com/rrusson, his LinkedIn profile is at https://www.linkedin.com/in/rrusson, and his personal website is https://RyanRusson.com.
 
+OBJECTIVE: To use his skills as a Senior Software Engineer in full-stack development, software architecture, and team leadership to deliver high-quality, scalable solutions that drive business success and foster continuous improvement.
+WORK PREFERENCES:
+- Remote work or less than 5 hours of weekly commuting.
+- Opportunities for professional growth and learning, projects that leverage current technologies and methodologies, with an emphasis on best practices and code quality.
+- Must be full-time. Permanent positions are preferred, but open to contract work.
+
 Experience in various technologies (don't guess based on resume):
 C# 13: 18 yrs
 .NET: 20 yrs
@@ -63,3 +69,4 @@ Best Practices: 15 yrs
 Scrum/Agile: 10 yrs
 Kanban: 5 yrs
 Technical Documentation: 10 yrs
+
