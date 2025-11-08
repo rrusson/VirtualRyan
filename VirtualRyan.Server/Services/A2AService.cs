@@ -112,30 +112,28 @@ namespace VirtualRyan.Server.Services
 		{
 			_logger.LogInformation("A2A: Providing agent card for URL: {AgentUrl}", agentUrl);
 
-			var agentSection = _configuration.GetSection("A2A:Agent");
-			string agentName = agentSection["Name"] ?? "Resume Agent";
-			string agentVersion = agentSection["Version"] ?? "1.0.0";
-			string agentDescription = agentSection["Description"] ?? "Bot-to-bot communication for accessing professional information.";
-			string iconUrl = agentSection["IconUrl"] ?? "https://ai.rrusson.com/favicon.ico";
+			var agentConfig = _configuration.GetSection("A2A:Agent");
+			string agentName = agentConfig["Name"] ?? "Resume Question Agent";
+			string agentDescription = agentConfig["Description"] ?? "Bot-to-bot communication for accessing professional CV information.";
 			var provider = new AgentProvider
 			{
-				Organization = agentSection["Provider"] ?? agentName,
-				Url = agentSection["ProviderUrl"] ?? agentUrl
+				Organization = agentConfig["Provider"] ?? agentName,
+				Url = agentConfig["ProviderUrl"] ?? agentUrl
 			};
 
-			var skills = new List<AgentSkill>
-			{
+			List<AgentSkill> skills =
+			[
 				new AgentSkill
 				{
-					Id = "message/send",
+					Id = "resume-query",
 					Name = "Ask a question about my resume and qualifications",
 					Description = agentDescription,
-					Tags = ["chatbot", "resume", "recruitment", "jobs", "hiring", "professional", "information"],
+					Tags = ["resume", "recruitment", "jobs", "hiring", "vocational", "skills", "information"],
 					InputModes = ["text/plain", "application/json"],
 					OutputModes = ["text/plain", "application/json"],
 					Examples = ["How many years experience programming in C#?"]
 				}
-			};
+			];
 
 			return Task.FromResult(new AgentCard
 			{
@@ -143,9 +141,11 @@ namespace VirtualRyan.Server.Services
 				Description = agentDescription,
 				Provider = provider,
 				Url = agentUrl,
+				DocumentationUrl = agentConfig["DocumentationUrl"] ?? agentUrl,
 				Skills = skills,
-				IconUrl = iconUrl,
-				Version = agentVersion,
+				IconUrl = agentConfig["IconUrl"] ?? "https://ai.rrusson.com/favicon.ico",
+				Version = agentConfig["Version"] ?? "1.0.0",
+				PreferredTransport = AgentTransport.JsonRpc,
 				DefaultInputModes = ["text/plain", "application/json"],
 				DefaultOutputModes = ["text/plain", "application/json"],
 				Capabilities = new AgentCapabilities { Streaming = false, PushNotifications = false, StateTransitionHistory = false }

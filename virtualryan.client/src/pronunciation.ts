@@ -5,6 +5,7 @@ export class Pronunciation {
         const phoneticMap: { [key: string]: string } = {
             ".NET": "dot net",
             "API": "A P I",
+            "APIs": "A P eyes",
             "ASP.NET": "A S P dot net",
             "AWS": "A W S",
             "C#": "C sharp",

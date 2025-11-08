@@ -48,7 +48,6 @@ Accept: application/json
 {
   "jsonrpc": "2.0",
   "method": "hello",
-  "params": {},
   "id": 42
 }
 ###

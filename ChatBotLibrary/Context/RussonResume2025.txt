@@ -8,7 +8,7 @@ PROGRAMMING & SOFTWARE SKILLS:
 C# 13, .NET 9, .NET Core, JavaScript, jQuery, TypeScript, ASP.NET, MVC, MVVM,
 REST, SOAP, WCF, Web API, HTML, CSS, XML, XAML, Xamarin Forms, .NET MAUI,
 OOP, IoC, Dependency Injection, SAST, OWASP Standards, SOLID, GoF Design Patterns,
-LLM Integration, Ollama, MCP, TDD, Unit Tests, Postman Tests, AWS, S3, SNS, SQS,
+LLM Integration, A2A, Ollama, MCP, TDD, Unit Tests, Postman Tests, AWS, S3, SNS, SQS,
 MS SQL Server, NoSQL DBs, T-SQL, Database Optimization, LINQ, Entity Framework
 
 
