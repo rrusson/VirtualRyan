@@ -6,8 +6,12 @@ function App() {
 		<div>
 			<ResumeChat />
 			<footer className="footer">
-				<div className="container">
-					<span className="text-muted">&copy; 2025 r.russon consulting</span>
+				<div className="container text-muted">
+					<span>
+						&copy; 2025 r.russon consulting
+						&nbsp; <a href="https://rrusson.com/RussonResume.pdf" target="_blank" className="text-muted">[hard copy]</a>
+						&nbsp; <a href="https://github.com/rrusson/VirtualRyan" target="_blank" className="text-muted">[repo]</a>
+					</span>
 				</div>
 			</footer>
 		</div>

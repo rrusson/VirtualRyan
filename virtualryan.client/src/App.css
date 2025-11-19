@@ -10,6 +10,11 @@ th, td {
 	padding-right: 1rem;
 }
 
+.text-muted {
+	color:gray;
+	text-decoration: none
+}
+
 .footer {
 	position: fixed;
 	left: 0;
