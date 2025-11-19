@@ -10,7 +10,7 @@ function App() {
 					<span>
 						&copy; 2025 r.russon consulting
 						&nbsp; <a href="https://rrusson.com/RussonResume.pdf" target="_blank" rel="noopener noreferrer" className="text-muted">[hard copy]</a>
-						&nbsp; <a href="https://github.com/rrusson/VirtualRyan" target="_blank" className="text-muted">[repo]</a>
+						&nbsp; <a href="https://github.com/rrusson/VirtualRyan" target="_blank" rel="noopener noreferrer" className="text-muted">[repo]</a>
 					</span>
 				</div>
 			</footer>
