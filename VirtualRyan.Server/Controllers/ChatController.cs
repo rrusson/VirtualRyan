@@ -32,8 +32,9 @@ namespace VirtualRyan.Server.Controllers
 				throw new ArgumentException("Question cannot be null or empty.", nameof(request.Question));
 			}
 
+			var sanitizedQuestionForLog = request.Question.Replace("\r", "").Replace("\n", "");
 			var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
-			_logger.LogInformation("{ip} RECEIVED QUESTION: {Question}", ip, request.Question);
+			_logger.LogInformation("{ip} RECEIVED QUESTION: {Question}", ip, sanitizedQuestionForLog);
 
 			try
 			{
@@ -47,7 +48,7 @@ namespace VirtualRyan.Server.Controllers
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "ERROR in AskQuestion for question: {Question}", request.Question);
+				_logger.LogError(ex, "ERROR in AskQuestion for question: {Question}", sanitizedQuestionForLog);
 				throw;
 			}
 		}
