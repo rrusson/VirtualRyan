@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 
 using Azure;
 using Azure.AI.Inference;
@@ -7,7 +7,8 @@ namespace ChatBotLibrary
 {
 	public class RyanChat
 	{
-		private readonly string _systemPrompt;
+        private const string _lmmEndpoint = "https://models.github.ai/inference";
+        private readonly string _systemPrompt;
 
 		public RyanChat(string systemPrompt)
 		{
@@ -17,17 +18,18 @@ namespace ChatBotLibrary
 		public async Task<string> AskQuestionAsync(string[] messages)
 		{
 			string key = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new InvalidOperationException("GITHUB_TOKEN not found!");
-			var endpoint = new Uri("https://models.github.ai/inference");
+			var endpoint = new Uri(_lmmEndpoint);
 			var credential = new AzureKeyCredential(key);
 			string model = "openai/gpt-4.1";
 
-			var client = new ChatCompletionsClient(endpoint, credential, new ChatCompletionsClientOptions());
+            var client = new ChatCompletionsClient(endpoint, credential, new ChatCompletionsClientOptions());
 			ChatCompletionsOptions requestOptions = GetResumeChatOptions(messages, model);
 
 			var responseText = new StringBuilder(6000);
+			
 			StreamingResponse<StreamingChatCompletionsUpdate> response = await client.CompleteStreamingAsync(requestOptions).ConfigureAwait(false);
 
-			await foreach (StreamingChatCompletionsUpdate chatUpdate in response)
+			await foreach (StreamingChatCompletionsUpdate chatUpdate in response.EnumerateValues().ConfigureAwait(false))
 			{
 				if (!string.IsNullOrEmpty(chatUpdate.ContentUpdate))
 				{

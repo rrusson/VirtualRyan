@@ -22,9 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChatBotLibrary\ChatBotLibrary.csproj" />
-    <ProjectReference Include="..\virtualryan.client\virtualryan.client.esproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
 
 </Project>

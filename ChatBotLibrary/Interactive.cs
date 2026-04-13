@@ -1,16 +1,17 @@
-﻿using Azure;
+using Azure;
 using Azure.AI.Inference;
 
 namespace ChatBotLibrary
 {
 	public class Interactive
 	{
-		public async Task Chat()
+		private const string _llmEndpoint = "https://models.github.ai/inference";
+
+        public async Task Chat()
 		{
 			string key = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new InvalidOperationException("GITHUB_TOKEN not found!");
-			var endpoint = new Uri("https://models.github.ai/inference");
+			var endpoint = new Uri(_llmEndpoint);
 			var credential = new AzureKeyCredential(key);
-			//var model = "microsoft/Phi-4";
 			string model = "openai/gpt-4.1";
 
 			var client = new ChatCompletionsClient(endpoint, credential, new ChatCompletionsClientOptions());
@@ -30,8 +31,7 @@ namespace ChatBotLibrary
 			};
 
 			StreamingResponse<StreamingChatCompletionsUpdate> response = await client.CompleteStreamingAsync(requestOptions).ConfigureAwait(false);
-
-			await foreach (StreamingChatCompletionsUpdate chatUpdate in response)
+			await foreach (var chatUpdate in response.EnumerateValues().ConfigureAwait(false))
 			{
 				if (!string.IsNullOrEmpty(chatUpdate.ContentUpdate))
 				{

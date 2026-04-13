@@ -12,7 +12,11 @@ namespace VirtualRyan.Server.Services
 	/// </summary>
 	public partial class A2AService
 	{
-		private readonly ILogger<A2AService> _logger;
+		private const string _unknown = "unknown";
+		private const string _jsonContentType = "application/json";
+        private const string _textPlain = "text/plain";
+
+        private readonly ILogger<A2AService> _logger;
 		private readonly IConfiguration _configuration;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly RateLimitingService _rateLimitingService;
@@ -65,7 +69,7 @@ namespace VirtualRyan.Server.Services
 			}
 
 			var callingAgent = await GetCallerAgentCardAsync(cancellationToken).ConfigureAwait(false);
-			string caller = callingAgent?.Name ?? "unknown";
+			string caller = callingAgent?.Name ?? _unknown;
 
 			// Get the system prompt and enhance it for A2A context
 			string baseSystemPrompt = _configuration["SystemPrompt"] ?? string.Empty;
@@ -129,8 +133,8 @@ namespace VirtualRyan.Server.Services
 					Name = "Ask a question about my resume and qualifications",
 					Description = agentDescription,
 					Tags = ["resume", "recruitment", "jobs", "hiring", "vocational", "skills", "information"],
-					InputModes = ["text/plain", "application/json"],
-					OutputModes = ["text/plain", "application/json"],
+					InputModes = [_textPlain, _jsonContentType],
+					OutputModes = [_textPlain, _jsonContentType],
 					Examples = ["How many years experience programming in C#?"]
 				}
 			];
@@ -146,8 +150,8 @@ namespace VirtualRyan.Server.Services
 				IconUrl = agentConfig["IconUrl"] ?? "https://ai.rrusson.com/favicon.ico",
 				Version = agentConfig["Version"] ?? "1.0.0",
 				PreferredTransport = AgentTransport.JsonRpc,
-				DefaultInputModes = ["text/plain", "application/json"],
-				DefaultOutputModes = ["text/plain", "application/json"],
+				DefaultInputModes = [_textPlain, _jsonContentType],
+				DefaultOutputModes = [_textPlain, _jsonContentType],
 				Capabilities = new AgentCapabilities { Streaming = false, PushNotifications = false, StateTransitionHistory = false }
 			});
 		}
@@ -162,11 +166,11 @@ namespace VirtualRyan.Server.Services
 			try
 			{
 				var httpContext = _httpContextAccessor.HttpContext;
-				string remoteIp = httpContext?.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+				string remoteIp = httpContext?.Connection.RemoteIpAddress?.ToString() ?? _unknown;
 				string scheme = httpContext?.Request?.Scheme ?? "https";
-				string host = httpContext?.Request?.Host.Value ?? "unknown";
+				string host = httpContext?.Request?.Host.Value ?? _unknown;
 
-				if (host == "unknown" || IsLocalRequest(httpContext) || host.StartsWith("localhost"))
+				if (host == _unknown || IsLocalRequest(httpContext) || host.StartsWith("localhost"))
 				{
 					//No local requests; infinite loops are not fun
 					return null;
@@ -194,7 +198,7 @@ namespace VirtualRyan.Server.Services
 		/// <returns>AgentCard for the host</returns>
 		private async Task<AgentCard> GetAgentCard(string hostUri, CancellationToken cancellationToken)
 		{
-			string sanitizedHostUri = SanitizeForLog(hostUri);
+			string sanitizedHostUri = TextSanitizer.Sanitize(hostUri);
 			if (_agentCardCache.TryGetValue(hostUri, out var cachedCard) && !cachedCard.IsExpired())
 			{
 				_logger.LogDebug("A2A: Using cached agent card for host: {Host}", sanitizedHostUri);
@@ -205,7 +209,7 @@ namespace VirtualRyan.Server.Services
 			_logger.LogDebug("A2A: Fetching agent card for host: {Host}", sanitizedHostUri);
 			var resolver = new A2ACardResolver(new Uri(hostUri));
 			AgentCard requesterCard = await resolver.GetAgentCardAsync(cancellationToken).ConfigureAwait(false);
-			requesterCard.Name ??= "unknown";
+			requesterCard.Name ??= _unknown;
 			requesterCard.Description ??= "No description provided";
 
 			_agentCardCache[hostUri] = new CachedAgentCard(requesterCard, DateTime.UtcNow.Add(_cacheExpirationTime));
@@ -241,20 +245,6 @@ namespace VirtualRyan.Server.Services
 			}
 
 			return IPAddress.IsLoopback(remoteIp) || remoteIp.Equals(localIp);
-		}
-
-		/// <summary>
-		/// Sanitizes a string for safe logging by removing control characters, especially newlines.
-		/// </summary>
-		private static string SanitizeForLog(string input)
-		{
-			if (input == null)
-			{
-				return string.Empty;
-			}
-
-			// Remove carriage return, linefeeds, tab characters, and other control characters
-			return string.Concat(input.Where(c => !char.IsControl(c)));
 		}
 	}
 }

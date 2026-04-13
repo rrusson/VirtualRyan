@@ -7,7 +7,7 @@ namespace VirtualRyan.Server.Services
 		/// <summary>
 		/// Cache entry for an AgentCard with expiration time
 		/// </summary>
-		private class CachedAgentCard
+		private sealed class CachedAgentCard
 		{
 			public AgentCard AgentCard { get; }
 
