@@ -1,6 +1,7 @@
 using ChatBotLibrary;
 
 using Microsoft.AspNetCore.Mvc;
+using VirtualRyan.Server.Services;
 
 namespace VirtualRyan.Server.Controllers
 {
@@ -32,7 +33,7 @@ namespace VirtualRyan.Server.Controllers
 				throw new ArgumentException("Question cannot be null or empty.", nameof(request));
 			}
 
-			var sanitizedQuestionForLog = request.Question.Replace("\r", "").Replace("\n", "");
+			var sanitizedQuestionForLog = TextSanitizer.Sanitize(request.Question);
 			var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
 			_logger.LogInformation("{Ip} RECEIVED QUESTION: {Question}", ip, sanitizedQuestionForLog);
 
@@ -51,5 +52,7 @@ namespace VirtualRyan.Server.Controllers
 				return "Sorry, an error occurred while processing your question.";
             }
 		}
+
+
 	}
 }

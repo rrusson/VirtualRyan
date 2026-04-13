@@ -5,12 +5,12 @@ namespace ChatBotLibrary
 {
 	public class Interactive
 	{
-		private const string _lmmEndpoint = "https://models.github.ai/inference";
+		private const string _llmEndpoint = "https://models.github.ai/inference";
 
         public async Task Chat()
 		{
 			string key = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new InvalidOperationException("GITHUB_TOKEN not found!");
-			var endpoint = new Uri(_lmmEndpoint);
+			var endpoint = new Uri(_llmEndpoint);
 			var credential = new AzureKeyCredential(key);
 			string model = "openai/gpt-4.1";
 
