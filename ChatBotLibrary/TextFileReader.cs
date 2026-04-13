@@ -1,10 +1,10 @@
-﻿namespace ChatBotLibrary
+namespace ChatBotLibrary
 {
-	internal class TextFileReader
+	internal static class TextFileReader
 	{
 		internal static string[] ReadAllTextFiles(string directoryPath)
 		{
-			ArgumentNullException.ThrowIfNull(directoryPath, nameof(directoryPath));
+			ArgumentNullException.ThrowIfNull(directoryPath);
 
 			if (!Directory.Exists(directoryPath))
 			{
@@ -17,7 +17,7 @@
 
 		internal static string ReadTextFile(string filePath)
 		{
-			ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
+			ArgumentNullException.ThrowIfNull(filePath);
 
 			try
 			{
@@ -32,9 +32,17 @@
 			{
 				throw new InvalidOperationException($"Access denied to file at {filePath}", ex);
 			}
-			catch (Exception ex)
+			catch(System.Security.SecurityException ex)
 			{
-				throw new Exception($"An unexpected error occurred while reading the file: {ex.Message}", ex);
+				throw new InvalidOperationException($"Security error accessing file at {filePath}", ex);
+            }
+			catch(ArgumentException ex)
+			{
+				throw new InvalidOperationException($"Invalid argument accessing file at {filePath}", ex);
+			}
+			catch(NotSupportedException ex)
+			{
+				throw new InvalidOperationException($"Unsupported file path format for {filePath}", ex);
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-﻿using ChatBotLibrary;
+using ChatBotLibrary;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,12 +29,12 @@ namespace VirtualRyan.Server.Controllers
 			if (string.IsNullOrWhiteSpace(request?.Question))
 			{
 				_logger.LogWarning("Received an empty or null question.");
-				throw new ArgumentException("Question cannot be null or empty.", nameof(request.Question));
+				throw new ArgumentException("Question cannot be null or empty.", nameof(request));
 			}
 
 			var sanitizedQuestionForLog = request.Question.Replace("\r", "").Replace("\n", "");
 			var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
-			_logger.LogInformation("{ip} RECEIVED QUESTION: {Question}", ip, sanitizedQuestionForLog);
+			_logger.LogInformation("{Ip} RECEIVED QUESTION: {Question}", ip, sanitizedQuestionForLog);
 
 			try
 			{
@@ -43,14 +43,13 @@ namespace VirtualRyan.Server.Controllers
 				string response = await chatClient.AskQuestionAsync([request.Question]).ConfigureAwait(false);
 
 				_logger.LogInformation("RETURNING RESPONSE: {Response}", response);
-
 				return response;
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "ERROR in AskQuestion for question: {Question}", sanitizedQuestionForLog);
-				throw;
-			}
+				return "Sorry, an error occurred while processing your question.";
+            }
 		}
 	}
 }

@@ -7,7 +7,7 @@ using VirtualRyan.Server.Services;
 
 namespace VirtualRyan.Server
 {
-	public class Program
+	public static class Program
 	{
 		public static void Main(string[] args)
 		{

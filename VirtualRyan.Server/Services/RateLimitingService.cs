@@ -101,7 +101,7 @@ namespace VirtualRyan.Server.Services
             };
         }
         
-        private class ClientRateLimits
+        private sealed class ClientRateLimits
         {
             public SlidingWindowRateLimiter PerMinuteLimiter { get; }
             public SlidingWindowRateLimiter PerDayLimiter { get; }
