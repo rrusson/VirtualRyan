@@ -10,7 +10,7 @@ namespace VirtualRyan.Server.Services
 	/// <summary>
 	/// Service for handling A2A (Application-to-Application) communication with VirtualRyan
 	/// </summary>
-	public partial class A2AService
+	public partial class A2AService : IAgentHandler
 	{
 		private const string _unknown = "unknown";
 		private const string _jsonContentType = "application/json";
@@ -38,34 +38,20 @@ namespace VirtualRyan.Server.Services
 		}
 
 		/// <summary>
-		/// Assigns the A2A handlers to the given TaskManager
+		/// Handles an incoming A2A message request
 		/// </summary>
-		/// <param name="taskManager">TaskManager triggering A2AService events</param>
-		public void Attach(ITaskManager taskManager)
-		{
-			taskManager.OnAgentCardQuery = GetAgentCardAsync;
-			taskManager.OnMessageReceived = ProcessMessageAsync;
-		}
-
-		/// <summary>
-		/// Returns a response Message to the given A2A MessageSend request
-		/// </summary>
-		/// <param name="messageSendParams">The request message payload</param>
+		/// <param name="context">The request context containing the incoming message</param>
+		/// <param name="eventQueue">The event queue used to send responses back to the caller</param>
 		/// <param name="cancellationToken"></param>
-		/// <returns>A message, with a response as the first Parts element, if successful, otherwise an error</returns>
-		private async Task<Message> ProcessMessageAsync(MessageSendParams messageSendParams, CancellationToken cancellationToken)
+		public async Task ExecuteAsync(RequestContext context, AgentEventQueue eventQueue, CancellationToken cancellationToken)
 		{
-			var question = messageSendParams.Message.Parts.OfType<TextPart>().FirstOrDefault()?.Text;
+			string question = context.UserText ?? string.Empty;
+			var responder = new MessageResponder(eventQueue, context.ContextId);
 
 			if (string.IsNullOrWhiteSpace(question))
 			{
-				return new Message
-				{
-					Role = MessageRole.Agent,
-					MessageId = Guid.NewGuid().ToString(),
-					ContextId = messageSendParams.Message.ContextId,
-					Parts = [new TextPart { Text = "Error: Empty request" }]
-				};
+				await responder.ReplyAsync("Error: Empty request", cancellationToken).ConfigureAwait(false);
+				return;
 			}
 
 			var callingAgent = await GetCallerAgentCardAsync(cancellationToken).ConfigureAwait(false);
@@ -84,35 +70,92 @@ namespace VirtualRyan.Server.Services
 				string response = await chatClient.AskQuestionAsync([question]).ConfigureAwait(false);
 				_logger.LogInformation("A2A: INTERACTION\r\nQ: {Question} \r\nA: {Response}", question, response);
 
-				return new Message
-				{
-					Role = MessageRole.Agent,
-					MessageId = Guid.NewGuid().ToString(),
-					ContextId = messageSendParams.Message.ContextId,
-					Parts = [new TextPart { Text = response }]
-				};
+				await responder.ReplyAsync(response, cancellationToken).ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "A2A: Error processing task from {Caller}: {Question}", caller, question);
-
-				return new Message
-				{
-					Role = MessageRole.Agent,
-					MessageId = Guid.NewGuid().ToString(),
-					ContextId = messageSendParams.Message.ContextId,
-					Parts = [new TextPart { Text = "Error processing request" }]
-				};
+				await responder.ReplyAsync("Error processing request", cancellationToken).ConfigureAwait(false);
 			}
 		}
 
 		/// <summary>
-		/// Returns this agent's AgentCard for A2A communication
+		/// Handles cancellation of an in-flight A2A request
 		/// </summary>
-		/// <param name="agentUrl"></param>
+		/// <param name="context">The request context for the task being cancelled</param>
+		/// <param name="eventQueue">The event queue</param>
 		/// <param name="cancellationToken"></param>
-		/// <returns></returns>
-		private Task<AgentCard> GetAgentCardAsync(string agentUrl, CancellationToken cancellationToken)
+		public Task CancelAsync(RequestContext context, AgentEventQueue eventQueue, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation("A2A: Task cancelled for context {ContextId}", context.ContextId);
+			return Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// Builds and returns this agent's AgentCard from the given configuration
+		/// </summary>
+		/// <param name="configuration">Application configuration</param>
+		/// <returns>An AgentCard describing this agent's capabilities</returns>
+		public static AgentCard BuildAgentCard(IConfiguration configuration)
+		{
+			var agentConfig = configuration.GetSection("A2A:Agent");
+			string agentUrl = agentConfig["Url"] ?? "https://ai.rrusson.com";
+			string agentName = agentConfig["Name"] ?? "Resume Question Agent";
+			string agentDescription = agentConfig["Description"] ?? "Bot-to-bot communication for accessing professional CV information.";
+			var provider = new AgentProvider
+			{
+				Organization = agentConfig["Provider"] ?? agentName,
+				Url = agentConfig["ProviderUrl"] ?? agentUrl
+			};
+
+			List<AgentSkill> skills =
+			[
+				new AgentSkill
+				{
+					Id = "resume-query",
+					Name = "Ask a question about my resume and qualifications",
+					Description = agentDescription,
+					Tags = ["resume", "recruitment", "jobs", "hiring", "vocational", "skills", "information"],
+					InputModes = [_textPlain, _jsonContentType],
+					OutputModes = [_textPlain, _jsonContentType],
+					Examples = ["How many years experience programming in C#?"]
+				}
+			];
+
+			return new AgentCard
+			{
+				Name = agentName,
+				Description = agentDescription,
+				Provider = provider,
+				DocumentationUrl = agentConfig["DocumentationUrl"] ?? agentUrl,
+				Skills = skills,
+				IconUrl = agentConfig["IconUrl"] ?? "https://ai.rrusson.com/favicon.ico",
+				Version = agentConfig["Version"] ?? "1.0.0",
+				DefaultInputModes = [_textPlain, _jsonContentType],
+				DefaultOutputModes = [_textPlain, _jsonContentType],
+				SupportedInterfaces =
+				[
+					new AgentInterface
+					{
+						Url = $"{agentUrl}/a2a",
+						ProtocolBinding = ProtocolBindingNames.JsonRpc
+					},
+					new AgentInterface
+					{
+						Url = $"{agentUrl}/a2a",
+						ProtocolBinding = ProtocolBindingNames.HttpJson
+					}
+				],
+				Capabilities = new AgentCapabilities { Streaming = false, PushNotifications = false }
+			};
+		}
+
+		/// <summary>
+		/// Builds and returns this agent's AgentCard for A2A communication
+		/// </summary>
+		/// <param name="agentUrl">The base URL of this agent</param>
+		/// <returns>An AgentCard describing this agent's capabilities</returns>
+		public AgentCard BuildAgentCard(string agentUrl)
 		{
 			_logger.LogInformation("A2A: Providing agent card for URL: {AgentUrl}", agentUrl);
 
@@ -139,21 +182,32 @@ namespace VirtualRyan.Server.Services
 				}
 			];
 
-			return Task.FromResult(new AgentCard
+			return new AgentCard
 			{
 				Name = agentName,
 				Description = agentDescription,
 				Provider = provider,
-				Url = agentUrl,
 				DocumentationUrl = agentConfig["DocumentationUrl"] ?? agentUrl,
 				Skills = skills,
 				IconUrl = agentConfig["IconUrl"] ?? "https://ai.rrusson.com/favicon.ico",
 				Version = agentConfig["Version"] ?? "1.0.0",
-				PreferredTransport = AgentTransport.JsonRpc,
 				DefaultInputModes = [_textPlain, _jsonContentType],
 				DefaultOutputModes = [_textPlain, _jsonContentType],
-				Capabilities = new AgentCapabilities { Streaming = false, PushNotifications = false, StateTransitionHistory = false }
-			});
+				SupportedInterfaces =
+				[
+					new AgentInterface
+					{
+						Url = $"{agentUrl}/a2a",
+						ProtocolBinding = ProtocolBindingNames.JsonRpc
+					},
+					new AgentInterface
+					{
+						Url = $"{agentUrl}/a2a",
+						ProtocolBinding = ProtocolBindingNames.HttpJson
+					}
+				],
+				Capabilities = new AgentCapabilities { Streaming = false, PushNotifications = false }
+			};
 		}
 
 		/// <summary>

@@ -60,12 +60,12 @@ export class Pronunciation {
         let result = input;
         for (const key of sortedKeys) {
             // Use word boundaries for acronyms and phrases, case-insensitive
-            const pattern = new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, "gi");
+            const pattern = new RegExp(String.raw`\b${key.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)}\b`, "gi");
             result = result.replace(pattern, phoneticMap[key]);
         }
 
         // Bonus: let's shorten speech by removing any text in parentheses (including the parentheses)
-        result = result.replace(/\s*\([^)]*\)/g, "");
+        result = result.replaceAll(/\s*\([^)]*\)/g, "");
 
         return result;
     }

@@ -23,8 +23,11 @@ namespace VirtualRyan.Server
 			builder.Services.AddControllers();
 			builder.Services.AddOpenApi();
 			builder.Services.AddSingleton<RateLimitingService>();
-			builder.Services.AddScoped<A2AService>();
 			builder.Services.AddHttpContextAccessor();
+
+			// Build the AgentCard from configuration for A2A registration
+			var agentCard = A2AService.BuildAgentCard(builder.Configuration);
+			builder.Services.AddA2AAgent<A2AService>(agentCard);
 
 			// Add CORS for A2A clients if needed
 			builder.Services.AddCors(options =>
@@ -51,14 +54,8 @@ namespace VirtualRyan.Server
 			app.UseRateLimiting();
 
 			// A2A setup
-			var taskManager = new TaskManager();
-			using (var scope = app.Services.CreateScope())
-			{
-				var agent = scope.ServiceProvider.GetRequiredService<A2AService>();
-				agent.Attach(taskManager);
-			}
-			app.MapA2A(taskManager, "/a2a");
-			app.MapHttpA2A(taskManager, "/a2a");
+			app.MapA2A("/a2a");
+			app.MapWellKnownAgentCard(agentCard);
 
 			app.UseHttpsRedirection();
 			app.UseAuthorization();
