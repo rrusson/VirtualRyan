@@ -15,7 +15,7 @@ namespace ChatBotLibrary
 			_systemPrompt = systemPrompt;
 		}
 
-		public async Task<string> AskQuestionAsync(string[] messages)
+		public async Task<string> AskQuestionAsync(string[] messages, CancellationToken cancellationToken = default)
 		{
 			string key = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new InvalidOperationException("GITHUB_TOKEN not found!");
 			var endpoint = new Uri(_lmmEndpoint);
@@ -27,9 +27,9 @@ namespace ChatBotLibrary
 
 			var responseText = new StringBuilder(6000);
 			
-			StreamingResponse<StreamingChatCompletionsUpdate> response = await client.CompleteStreamingAsync(requestOptions).ConfigureAwait(false);
+			StreamingResponse<StreamingChatCompletionsUpdate> response = await client.CompleteStreamingAsync(requestOptions, cancellationToken).ConfigureAwait(false);
 
-			await foreach (StreamingChatCompletionsUpdate chatUpdate in response.EnumerateValues().ConfigureAwait(false))
+			await foreach (StreamingChatCompletionsUpdate chatUpdate in response.EnumerateValues().WithCancellation(cancellationToken).ConfigureAwait(false))
 			{
 				if (!string.IsNullOrEmpty(chatUpdate.ContentUpdate))
 				{

@@ -10,7 +10,7 @@ Accept: application/json
 ###
 
 # A2A - Get Agent Card Test
-GET {{VirtualRyan.Server_HostAddress}}/.well-known/agent.json
+GET {{VirtualRyan.Server_HostAddress}}/.well-known/agent-card.json
 ###
 
 # A2A VirtualRyan Agent Test - Ask Question
@@ -19,16 +19,15 @@ Content-Type: application/json
 Accept: application/json
 {
   "jsonrpc": "2.0",
-  "method": "message/send",
+  "method": "SendMessage",
   "id": "test-001",
   "params": {
     "message": {
-      "role": "user",
+      "role": "ROLE_USER",
       "messageId": "test-msg-001",
       "contextId": "test-context",
       "parts": [
         {
-          "kind":"text",
           "text": "What experience does Ryan have with AI?"
         }
       ]

@@ -78,7 +78,7 @@ Use the provided `VirtualRyan.Server.http` file to test endpoints:
 
 ```http
 # Agent info
-GET {{VirtualRyan.Server_HostAddress}}/.well-known/agent.json
+GET {{VirtualRyan.Server_HostAddress}}/.well-known/agent-card.json
 
 # Simple question
 POST {{VirtualRyan.Server_HostAddress}}/a2a
@@ -86,16 +86,15 @@ Content-Type: application/json
 Accept: application/json
 {
   "jsonrpc": "2.0",
-  "method": "message/send",
+  "method": "SendMessage",
   "id": "test-001",
   "params": {
     "message": {
-      "role": "user",
+      "role": "ROLE_USER",
       "messageId": "test-msg-001",
       "contextId": "test-context",
       "parts": [
         {
-          "kind":"text",
           "text": "What skills did you use at your last job?"
         }
       ]
