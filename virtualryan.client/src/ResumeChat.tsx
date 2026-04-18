@@ -250,7 +250,7 @@ function ResumeChat() {
 			timestamp: new Date()
 		};
 		setMessages([welcomeMessage]);
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [personConfig.welcomeMsg]);
 
 	const handleMicClick = async () => {

@@ -43,7 +43,7 @@ namespace VirtualRyan.Server
 			WebApplication app = builder.Build();
 
 			app.UseDefaultFiles();
-			app.MapStaticAssets();
+			app.UseStaticFiles();
 
 			if (isDev)
 			{
