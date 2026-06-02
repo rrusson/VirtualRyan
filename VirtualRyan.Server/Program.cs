@@ -57,12 +57,12 @@ namespace VirtualRyan.Server
 				app.MapOpenApi();
 			}
 
-			app.UseCors("A2APolicy");
+			app.UseCors();
 			app.UseRateLimiting();
 
 			// A2A setup - MapA2A only handles POST (JSON-RPC); add explicit GET for agent card discovery.
-			// CamelCase serialization is required: pydantic (Python A2A tester) validates lowercase field names.
-			// The top-level "url" field is injected for A2A v0.3 client compatibility.
+			// CamelCase serialization is required since pydantic (Python A2A tester) validates camelCase field names.
+			// Top-level "url" field is injected for A2A v0.3 client compatibility.
 			var camelCaseOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 			app.MapGet("/a2a", () =>
 			{
@@ -70,8 +70,8 @@ namespace VirtualRyan.Server
 				cardNode["url"] = agentCard.SupportedInterfaces.FirstOrDefault()?.Url;
 				return Results.Json(cardNode);
 			}).RequireCors("A2APolicy");
-			app.MapA2A("/a2a");
-			app.MapWellKnownAgentCard(agentCard);
+			app.MapA2A("/a2a").RequireCors("A2APolicy");
+			app.MapWellKnownAgentCard(agentCard).RequireCors("A2APolicy");
 
 			app.UseHttpsRedirection();
 			app.UseAuthorization();
