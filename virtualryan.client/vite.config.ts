@@ -57,11 +57,15 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '^/weatherforecast': {
+            '^/Chat': {
                 target,
                 secure: false
             },
-            '^/Chat': {
+            '^/a2a': {
+                target,
+                secure: false
+            },
+            '^\/\.well-known': {
                 target,
                 secure: false
             }
