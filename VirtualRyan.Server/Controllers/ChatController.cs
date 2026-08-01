@@ -8,7 +8,7 @@ namespace VirtualRyan.Server.Controllers
 {
 	[ApiController]
 	[Route("[controller]")]
-	public class ChatController : ControllerBase
+	public partial class ChatController : ControllerBase
 	{
 		private readonly ILogger<ChatController> _logger;
 		private readonly IConfiguration _configuration;
@@ -26,20 +26,6 @@ namespace VirtualRyan.Server.Controllers
 				LlmModel = configuration["Llm:Model"],
 				LlmApiKey = configuration["Llm:ApiKey"]
 			};
-		}
-
-		public class ChatRequest
-		{
-			public string? Question { get; set; }
-
-			public string? ConversationId { get; set; }
-		}
-
-		public class ChatResponse
-		{
-			public string Answer { get; set; } = string.Empty;
-
-			public string ConversationId { get; set; } = string.Empty;
 		}
 
 		[HttpPost("AskQuestion")]
