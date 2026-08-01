@@ -12,7 +12,7 @@ namespace VirtualRyan.Server.Controllers
 	{
 		private readonly ILogger<ChatController> _logger;
 		private readonly IConfiguration _configuration;
-		private readonly LlmConfig? _llmConfig;
+		private readonly LlmConfig _llmConfig;
 
 		public ChatController(ILogger<ChatController> logger, IConfiguration configuration)
 		{
@@ -38,15 +38,16 @@ namespace VirtualRyan.Server.Controllers
 			}
 
 			string conversationId = string.IsNullOrWhiteSpace(request.ConversationId) ? Guid.NewGuid().ToString("N") : request.ConversationId;
+			var sanitizedConversationIdForLog = TextSanitizer.Sanitize(conversationId);
 			var sanitizedQuestionForLog = TextSanitizer.Sanitize(request.Question);
 			var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
-			_logger.LogInformation("{Ip} RECEIVED QUESTION for conversation {ConversationId}: {Question}", ip, conversationId, sanitizedQuestionForLog);
+			_logger.LogInformation("{Ip} RECEIVED QUESTION for conversation {ConversationId}: {Question}", ip, sanitizedConversationIdForLog, sanitizedQuestionForLog);
 
 			try
 			{
 				string systemPrompt = _configuration["SystemPrompt"] ?? string.Empty;
 				var chatClient = new RyanChat(systemPrompt, _llmConfig);
-				string response = await chatClient.AskQuestionAsync([request.Question]).ConfigureAwait(false);
+				string response = await chatClient.AskQuestionAsync([request.Question], cancellationToken).ConfigureAwait(false);
 
 				_logger.LogInformation("RETURNING RESPONSE: {Response}", response);
 

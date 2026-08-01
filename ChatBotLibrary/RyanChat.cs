@@ -10,7 +10,7 @@ namespace ChatBotLibrary
 
 		private readonly string _systemPrompt;
 
-		private readonly LlmConfig? _llmConfig;
+		private readonly LlmConfig _llmConfig;
 
 		public RyanChat(string systemPrompt, LlmConfig? llmConfig = null)
 		{
