@@ -5,6 +5,7 @@ import { type PersonConfig, defaultPersonConfig } from './personConfig';
 import { useChat } from './hooks/useChat';
 import TextToSpeech from './textToSpeech';
 import { Pronunciation } from './pronunciation';
+import { renderMessageContent } from './utils/renderMessageContext';
 import type {
 	ChatTitleProps,
 	ChatMessage,
@@ -13,6 +14,12 @@ import type {
 	MessagesDisplayProps,
 	MessageInputProps
 } from './types/interfaces';
+
+type JQueryWithScrollbar = {
+	$: (element: Element) => {
+		mCustomScrollbar: ((action?: string, value?: string, options?: unknown) => void) | undefined;
+	};
+};
 
 // ChatTitle Component
 const ChatTitle: React.FC<ChatTitleProps> = ({ isListening, onMicClick, personConfig }) => {
@@ -52,7 +59,7 @@ const Message: React.FC<MessageProps> = ({ message, showTimestamp, personConfig 
 					<img src={personConfig.avatarUrl} alt="avatar" />
 				</figure>
 			)}
-			{message.content}
+			{renderMessageContent(message.content, message.id)}
 			{showTimestamp && (
 				<div className="timestamp">{formatTime(message.timestamp)}</div>
 			)}
@@ -79,7 +86,7 @@ const MessagesDisplay: React.FC<MessagesDisplayProps> = ({ messages, isLoading, 
 
 	const scrollToBottom = () => {
 		// Check if we're using mCustomScrollbar
-		const windowWithJQuery = window as any;
+		const windowWithJQuery = window as unknown as JQueryWithScrollbar;
 		if (typeof windowWithJQuery !== 'undefined' && windowWithJQuery.$ && messagesContentRef.current) {
 			const $messagesContent = windowWithJQuery.$(messagesContentRef.current);
 			if (typeof $messagesContent.mCustomScrollbar === 'function') {
@@ -107,7 +114,7 @@ const MessagesDisplay: React.FC<MessagesDisplayProps> = ({ messages, isLoading, 
 	// Initialize custom scrollbar when component mounts
 	useEffect(() => {
 		const initializeScrollbar = () => {
-			const windowWithJQuery = window as any;
+			const windowWithJQuery = window as unknown as JQueryWithScrollbar;
 			if (windowWithJQuery.$ && messagesContentRef.current) {
 				const $messagesContent = windowWithJQuery.$(messagesContentRef.current);
 				if (typeof $messagesContent.mCustomScrollbar === 'function') {
@@ -226,6 +233,7 @@ function ResumeChat() {
 	const [chatQuestion, setChatQuestion] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 	const [isListening, setIsListening] = useState<boolean>(false);
+	const [conversationId, setConversationId] = useState<string>(() => localStorage.getItem('virtualryan.conversationId') ?? '');
 	const [personConfig] = useState<PersonConfig>(defaultPersonConfig);
 
 	const speechToTextRef = useRef<SpeechToText | null>(null);
@@ -292,7 +300,7 @@ function ResumeChat() {
 
 			stt.listen();
 
-		} catch (error) {
+		} catch {
 			setIsListening(false);
 			addChatMessage('Speech recognition is not supported in this browser or an error occurred.', false);
 		}
@@ -310,19 +318,29 @@ function ResumeChat() {
 		setChatQuestion('');
 
 		try {
+			const requestPayload = {
+				question,
+				conversationId: conversationId || undefined,
+			};
+
 			const response = await fetch('/Chat/AskQuestion', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ question }),
+				body: JSON.stringify(requestPayload),
 			});
 
 			if (response.ok) {
-				const result = await response.text();
-				addChatMessage(result, false);
+				const result = await response.json() as { answer: string; conversationId: string; };
+				if (result.conversationId) {
+					setConversationId(result.conversationId);
+					localStorage.setItem('virtualryan.conversationId', result.conversationId);
+				}
+
+				addChatMessage(result.answer, false);
 				if (wasInputSpeech) {
-					speakBotResponse(result);
+					speakBotResponse(result.answer);
 				}
 			} else {
 				const errorText = await response.text();

@@ -1,72 +1,113 @@
-using System.Text;
-
-using Azure;
-using Azure.AI.Inference;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace ChatBotLibrary
 {
 	public class RyanChat
 	{
-        private const string _lmmEndpoint = "https://models.github.ai/inference";
-        private readonly string _systemPrompt;
+		private static readonly HttpClient _httpClient = new();
 
-		public RyanChat(string systemPrompt)
+		private readonly string _systemPrompt;
+
+		private readonly LlmConfig? _llmConfig;
+
+		public RyanChat(string systemPrompt, LlmConfig? llmConfig = null)
 		{
+			if (string.IsNullOrWhiteSpace(systemPrompt))
+			{
+				throw new ArgumentException("System prompt is required.", nameof(systemPrompt));
+			}
+
 			_systemPrompt = systemPrompt;
+			_llmConfig = new LlmConfig
+			{
+				LlmEndpoint = string.IsNullOrWhiteSpace(llmConfig?.LlmEndpoint) ? "http://localhost:11434/v1/chat/completions" : llmConfig.LlmEndpoint,
+				LlmModel = string.IsNullOrWhiteSpace(llmConfig?.LlmModel) ? "llama3.2:1b" : llmConfig.LlmModel,
+				LlmApiKey = string.IsNullOrWhiteSpace(llmConfig?.LlmApiKey) ? null : llmConfig.LlmApiKey
+			};
 		}
 
 		public async Task<string> AskQuestionAsync(string[] messages, CancellationToken cancellationToken = default)
 		{
-			string key = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new InvalidOperationException("GITHUB_TOKEN not found!");
-			var endpoint = new Uri(_lmmEndpoint);
-			var credential = new AzureKeyCredential(key);
-			string model = "openai/gpt-4.1";
+			ArgumentNullException.ThrowIfNull(messages);
 
-            var client = new ChatCompletionsClient(endpoint, credential, new ChatCompletionsClientOptions());
-			ChatCompletionsOptions requestOptions = GetResumeChatOptions(messages, model);
-
-			var responseText = new StringBuilder(6000);
-			
-			StreamingResponse<StreamingChatCompletionsUpdate> response = await client.CompleteStreamingAsync(requestOptions, cancellationToken).ConfigureAwait(false);
-
-			await foreach (StreamingChatCompletionsUpdate chatUpdate in response.EnumerateValues().WithCancellation(cancellationToken).ConfigureAwait(false))
+			if (messages.Length == 0)
 			{
-				if (!string.IsNullOrEmpty(chatUpdate.ContentUpdate))
-				{
-					responseText.Append(chatUpdate.ContentUpdate);
-					Console.Write(chatUpdate.ContentUpdate);
-				}
+				throw new ArgumentException("At least one message is required.", nameof(messages));
 			}
 
-			return responseText.ToString();
+			using var request = new HttpRequestMessage(HttpMethod.Post, _llmConfig?.LlmEndpoint)
+			{
+				Content = JsonContent.Create(GetRequestPayload(messages))
+			};
+
+			if (!string.IsNullOrWhiteSpace(_llmConfig?.LlmApiKey))
+			{
+				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _llmConfig.LlmApiKey);
+			}
+
+			using HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+			string responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+			return !response.IsSuccessStatusCode
+				? throw new InvalidOperationException($"LLM request failed with status code {(int)response.StatusCode}: {responseBody}")
+				: ExtractResponseContent(responseBody);
 		}
 
-		private ChatCompletionsOptions GetResumeChatOptions(string[] messages, string model)
+		private object GetRequestPayload(string[] messages)
 		{
-			// Use the system prompt passed from config in VirtualRyan.Server.
-			var systemMsg = new ChatRequestSystemMessage(_systemPrompt);
-
 			string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 			string contextFolderPath = Path.Combine(baseDirectory, "Context");
 			string[] contextFiles = TextFileReader.ReadAllTextFiles(contextFolderPath);
-			var contextMessages = contextFiles.Select(fileContent => new ChatRequestSystemMessage(fileContent));
+			string userMessage = string.Join(" ", messages.Where(message => !string.IsNullOrWhiteSpace(message)));
 
-			// ??? Should we include previous questions and answers ??? Or just the current question?
-			var userMsg = new ChatRequestUserMessage(string.Join(" ", messages));
-
-			List<ChatRequestMessage> combinedMessages = [systemMsg, .. contextMessages, userMsg];
-
-			var requestOptions = new ChatCompletionsOptions()
+			if (string.IsNullOrWhiteSpace(userMessage))
 			{
-				Temperature = 1.0f,
-				NucleusSamplingFactor = 1.0f,
-				MaxTokens = 500,
-				Model = model
+				throw new ArgumentException("User message content is required.", nameof(messages));
+			}
+
+			List<object> requestMessages =
+			[
+				new { role = "system", content = _systemPrompt },
+				.. contextFiles.Select(fileContent => new { role = "system", content = fileContent }),
+				new { role = "user", content = userMessage }
+			];
+
+			return new
+			{
+				model = _llmConfig?.LlmModel,
+				temperature = 1.0,
+				top_p = 1.0,
+				max_tokens = 500,
+				messages = requestMessages
 			};
+		}
 
-			combinedMessages.ForEach(msg => requestOptions.Messages.Add(msg));
+		private static string ExtractResponseContent(string responseBody)
+		{
+			using JsonDocument json = JsonDocument.Parse(responseBody);
 
-			return requestOptions;
+			if (!json.RootElement.TryGetProperty("choices", out JsonElement choices) || choices.GetArrayLength() == 0)
+			{
+				throw new InvalidOperationException("LLM response did not contain any choices.");
+			}
+
+			JsonElement firstChoice = choices[0];
+
+			if (firstChoice.TryGetProperty("message", out JsonElement messageElement)
+				&& messageElement.TryGetProperty("content", out JsonElement contentElement)
+				&& !string.IsNullOrWhiteSpace(contentElement.GetString()))
+			{
+				return contentElement.GetString()!;
+			}
+			else
+			{
+				return firstChoice.TryGetProperty("text", out JsonElement textElement)
+					&& !string.IsNullOrWhiteSpace(textElement.GetString())
+				? textElement.GetString()!
+				: throw new InvalidOperationException("LLM response did not contain assistant content.");
+			}
 		}
 	}
 }
