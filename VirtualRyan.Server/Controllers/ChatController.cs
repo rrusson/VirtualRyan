@@ -57,6 +57,18 @@ namespace VirtualRyan.Server.Controllers
 					ConversationId = conversationId
 				});
 			}
+			catch (InvalidOperationException opEx)
+			{
+				_logger.LogError(opEx, "LLM request failed for question: {Question}", sanitizedQuestionForLog);
+
+				return Ok(new ChatResponse
+				{
+					Answer = opEx.Message == "LLM response was empty."
+						? "Sorry, I didn't get that. Please rephrase your question."
+						: "Sorry, an error occurred while processing your question.",
+					ConversationId = conversationId
+				});
+			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "ERROR in AskQuestion for question: {Question}", sanitizedQuestionForLog);

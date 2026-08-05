@@ -106,7 +106,7 @@ namespace ChatBotLibrary
 				return firstChoice.TryGetProperty("text", out JsonElement textElement)
 					&& !string.IsNullOrWhiteSpace(textElement.GetString())
 				? textElement.GetString()!
-				: throw new InvalidOperationException("LLM response did not contain assistant content.");
+				: throw new InvalidOperationException("LLM response was empty.");
 			}
 		}
 	}

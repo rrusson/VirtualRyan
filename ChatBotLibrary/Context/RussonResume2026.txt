@@ -15,10 +15,30 @@ MS SQL Server, NoSQL DBs, T-SQL, Database Optimization, LINQ, Entity Framework
 OTHER PROFESSIONAL SKILLS:
 Project Planning & Analysis, System Architecture & Design, Source Control Administration,
 Process Improvement, Intermediate Spanish Fluency, CI/CD Automation, DevOps,
-Code & Data Best Practices, Scrum, Agile, Kanban, Technical Documentation,
+Code & Data Best Practices, Scrum, Agile, Kanban, Technical Documentation
 
 
-WORK EXPERIENCE:
+PROFESSIONAL EXPERIENCE:
+IT Apps Manager/Dev Lead	City of Coconut Creek, FL	06/2026 - Present
+https://coconutcreek.gov
+* Re-engineering processes, procedures, and obsolete code
+* Introduced GitHub, code reviews, coding standards, sprints, bi-monthly releases, and automated deployments
+* Replacing Classic ASP applications with .NET applications and libraries, adding SharePoint integration, etc. etc.
+* Leading, mentoring, and managing a small team of developers, providing guidance, prioritization, and feedback
+* Partnering with stakeholders to gather requirements, define solutions, and translate needs into deliverables
+* Architecting scalable web-based applications, including front-end, business logic, and data layers
+* Supporting and enhancing core business systems including ERP, EDMS, and other web-based applications
+* Troubleshooting and resolving technical issues across both front-end and back-end systems
+* Acting as a liaison between users, IT, and third-party vendors to ensure timely support and issue resolution
+* Participating in project scoping, estimation, auditing, and delivery planning
+
+Contract Software Engineer Spirit Airlines, Dania Beach, FL	09/2025 - 05/2026
+https://spirit.com
+* Created and maintained .NET Core Web API microservices using C#, T-SQL, Entity Framework, Swagger, Open API standards, JWT, Postman, MOQ (mocking library), Redis, SignalR, Azure DevOps, and other technologies
+* Diagnosed and fixed microservice issues using Application Insights, Dynatrace, .HAR files, Fiddler, Postman, etc.
+* Set up Git hooks, local Sonar static code analysis in Docker, and other automation to facilitate development
+* Created MCP services using Docker, Ollama, VS 2026, Azure OpenAI, and other tools
+
 Software Developer III	MobileHelp/Medical Guardian, Boca Raton, FL	02/2017 - 06/2025
 https://www.mobilehelp.com
 * Developed and maintained web applications, APIs, and utilities using C#, MVC, Asp.NET, jQuery, JSON, Bootstrap, Web API, SQL, VS 2022, VS Code, Autofac (DI library), MOQ (mocking library), Git, and other technologies
