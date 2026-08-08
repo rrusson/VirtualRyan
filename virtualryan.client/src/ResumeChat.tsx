@@ -87,7 +87,7 @@ const MessagesDisplay: React.FC<MessagesDisplayProps> = ({ messages, isLoading, 
 	const scrollToBottom = () => {
 		// Check if we're using mCustomScrollbar
 		const windowWithJQuery = window as unknown as JQueryWithScrollbar;
-		if (typeof windowWithJQuery !== 'undefined' && windowWithJQuery.$ && messagesContentRef.current) {
+		if (windowWithJQuery?.$ && messagesContentRef.current) {
 			const $messagesContent = windowWithJQuery.$(messagesContentRef.current);
 			if (typeof $messagesContent.mCustomScrollbar === 'function') {
 				// Use custom scrollbar API
@@ -248,8 +248,8 @@ function ResumeChat() {
 
 	// Initialize TTS and Pronunciation instance, and add welcome message
 	useEffect(() => {
-		if (!textToSpeechRef.current) textToSpeechRef.current = new TextToSpeech();
-		if (!pronunciationRef.current) pronunciationRef.current = new Pronunciation();
+		textToSpeechRef.current ??= new TextToSpeech();
+		pronunciationRef.current ??= new Pronunciation();
 
 		const welcomeMessage: ChatMessage = {
 			id: 'welcome-' + Date.now(),
@@ -289,7 +289,7 @@ function ResumeChat() {
 			};
 
 			stt.onResult = (transcript: string) => {
-				if (transcript && transcript.trim()) {
+				if (transcript?.trim()) {
 					setChatQuestion(transcript.trim());
 					setTimeout(() => {
 						textToSpeechRef.current?.stop();

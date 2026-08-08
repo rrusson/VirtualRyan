@@ -2,10 +2,10 @@ import { fileURLToPath, URL } from 'node:url';
 
 import { defineConfig } from 'vite';
 import plugin from '@vitejs/plugin-react';
-import fs from 'fs';
-import path from 'path';
-import child_process from 'child_process';
-import { env } from 'process';
+import fs from 'node:fs';
+import path from 'node:path';
+import child_process from 'node:child_process';
+import { env } from 'node:process';
 import copy from 'rollup-plugin-copy';
 
 const baseFolder =
@@ -35,8 +35,9 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
     }
 }
 
-const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
-    env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7053';
+const target = env.ASPNETCORE_HTTPS_PORT
+    ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}`
+    : env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7053';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -65,12 +66,12 @@ export default defineConfig({
                 target,
                 secure: false
             },
-            '^\/\.well-known': {
+            '^/.well-known': {
                 target,
                 secure: false
             }
         },
-        port: parseInt(env.DEV_SERVER_PORT || '62370'),
+        port: Number.parseInt(env.DEV_SERVER_PORT || '62370'),
         https: {
             key: fs.readFileSync(keyFilePath),
             cert: fs.readFileSync(certFilePath),
