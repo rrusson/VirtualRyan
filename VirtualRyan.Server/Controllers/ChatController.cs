@@ -13,11 +13,13 @@ namespace VirtualRyan.Server.Controllers
 		private readonly ILogger<ChatController> _logger;
 		private readonly IConfiguration _configuration;
 		private readonly LlmConfig _llmConfig;
+		private readonly ConversationHistoryService _historyService;
 
-		public ChatController(ILogger<ChatController> logger, IConfiguration configuration)
+		public ChatController(ILogger<ChatController> logger, IConfiguration configuration, ConversationHistoryService historyService)
 		{
 			_logger = logger;
 			_configuration = configuration;
+			_historyService = historyService;
 			_logger.LogInformation("ChatController initialized");
 
 			_llmConfig = new LlmConfig
@@ -47,7 +49,14 @@ namespace VirtualRyan.Server.Controllers
 			{
 				string systemPrompt = _configuration["SystemPrompt"] ?? string.Empty;
 				var chatClient = new RyanChat(systemPrompt, _llmConfig);
-				string response = await chatClient.AskQuestionAsync([request.Question], cancellationToken).ConfigureAwait(false);
+
+				IReadOnlyList<ChatMessage> history = _historyService.GetHistory(conversationId);
+
+				(string response, IReadOnlyList<ChatMessage> updatedHistory) = await chatClient
+					.AskQuestionWithHistoryAsync(request.Question, history, cancellationToken)
+					.ConfigureAwait(false);
+
+				_historyService.SaveHistory(conversationId, updatedHistory);
 
 				_logger.LogInformation("RETURNING RESPONSE: {Response}", response);
 
