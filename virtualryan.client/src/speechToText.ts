@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Provides basic speech-to-text functionality using the Web Speech API.
 declare global {
 	interface Window {

@@ -67,7 +67,7 @@ namespace VirtualRyan.Server.Services
 			try
 			{
 				var chatClient = new RyanChat(a2aSystemPrompt);
-				string response = await chatClient.AskQuestionAsync([question], cancellationToken).ConfigureAwait(false);
+				string response = await chatClient.AskQuestionAsync(question, cancellationToken).ConfigureAwait(false);
 				_logger.LogInformation("A2A: INTERACTION\r\nQ: {Question} \r\nA: {Response}", question, response);
 
 				await responder.ReplyAsync(response, cancellationToken).ConfigureAwait(false);

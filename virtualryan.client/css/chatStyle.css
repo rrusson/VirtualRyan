@@ -272,7 +272,15 @@ Message Box
 		width: 600px;
 	}
 
-	.message-box textarea:focus:-webkit-placeholder {
+	.message-box textarea:focus::-webkit-input-placeholder {
+		color: transparent;
+	}
+
+	.message-box textarea:focus::-moz-placeholder {
+		color: transparent;
+	}
+
+	.message-box textarea:focus::placeholder {
 		color: transparent;
 	}
 

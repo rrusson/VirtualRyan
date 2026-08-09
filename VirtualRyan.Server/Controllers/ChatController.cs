@@ -1,31 +1,37 @@
 using ChatBotLibrary;
 
 using Microsoft.AspNetCore.Mvc;
+
 using VirtualRyan.Server.Services;
 
 namespace VirtualRyan.Server.Controllers
 {
 	[ApiController]
 	[Route("[controller]")]
-	public class ChatController : ControllerBase
+	public partial class ChatController : ControllerBase
 	{
 		private readonly ILogger<ChatController> _logger;
 		private readonly IConfiguration _configuration;
+		private readonly LlmConfig _llmConfig;
+		private readonly ConversationHistoryService _historyService;
 
-		public ChatController(ILogger<ChatController> logger, IConfiguration configuration)
+		public ChatController(ILogger<ChatController> logger, IConfiguration configuration, ConversationHistoryService historyService)
 		{
 			_logger = logger;
 			_configuration = configuration;
+			_historyService = historyService;
 			_logger.LogInformation("ChatController initialized");
-		}
 
-		public class ChatRequest
-		{
-			public string? Question { get; set; }
+			_llmConfig = new LlmConfig
+			{
+				LlmEndpoint = configuration["Llm:Endpoint"],
+				LlmModel = configuration["Llm:Model"],
+				LlmApiKey = configuration["Llm:ApiKey"]
+			};
 		}
 
 		[HttpPost("AskQuestion")]
-		public async Task<string> AskQuestion([FromBody] ChatRequest request)
+		public async Task<ActionResult<ChatResponse>> AskQuestion([FromBody] ChatRequest request, CancellationToken cancellationToken)
 		{
 			if (string.IsNullOrWhiteSpace(request?.Question))
 			{
@@ -33,26 +39,55 @@ namespace VirtualRyan.Server.Controllers
 				throw new ArgumentException("Question cannot be null or empty.", nameof(request));
 			}
 
+			string conversationId = string.IsNullOrWhiteSpace(request.ConversationId) ? Guid.NewGuid().ToString("N") : request.ConversationId;
+			var sanitizedConversationIdForLog = TextSanitizer.Sanitize(conversationId);
 			var sanitizedQuestionForLog = TextSanitizer.Sanitize(request.Question);
 			var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
-			_logger.LogInformation("{Ip} RECEIVED QUESTION: {Question}", ip, sanitizedQuestionForLog);
+			_logger.LogInformation("{Ip} RECEIVED QUESTION for conversation {ConversationId}: {Question}", ip, sanitizedConversationIdForLog, sanitizedQuestionForLog);
 
 			try
 			{
 				string systemPrompt = _configuration["SystemPrompt"] ?? string.Empty;
-				RyanChat chatClient = new RyanChat(systemPrompt);
-				string response = await chatClient.AskQuestionAsync([request.Question]).ConfigureAwait(false);
+				var chatClient = new RyanChat(systemPrompt, _llmConfig);
+
+				IReadOnlyList<ChatMessage> history = _historyService.GetHistory(conversationId);
+
+				(string response, IReadOnlyList<ChatMessage> updatedHistory) = await chatClient
+					.AskQuestionWithHistoryAsync(request.Question, history, cancellationToken)
+					.ConfigureAwait(false);
+
+				_historyService.SaveHistory(conversationId, updatedHistory);
 
 				_logger.LogInformation("RETURNING RESPONSE: {Response}", response);
-				return response;
+
+				return Ok(new ChatResponse
+				{
+					Answer = response,
+					ConversationId = conversationId
+				});
+			}
+			catch (InvalidOperationException opEx)
+			{
+				_logger.LogError(opEx, "LLM request failed for question: {Question}", sanitizedQuestionForLog);
+
+				return Ok(new ChatResponse
+				{
+					Answer = opEx.Message == "LLM response was empty."
+						? "Sorry, I didn't get that. Please rephrase your question."
+						: "Sorry, an error occurred while processing your question.",
+					ConversationId = conversationId
+				});
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "ERROR in AskQuestion for question: {Question}", sanitizedQuestionForLog);
-				return "Sorry, an error occurred while processing your question.";
-            }
+
+				return Ok(new ChatResponse
+				{
+					Answer = "Sorry, an error occurred while processing your question.",
+					ConversationId = conversationId
+				});
+			}
 		}
-
-
 	}
 }

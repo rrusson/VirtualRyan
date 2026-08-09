@@ -151,19 +151,19 @@ export class TextToSpeech {
 	}
 
 	stop(): void {
-		if (this._synth && this._synth.speaking) {
+		if (this._synth?.speaking) {
 			this._synth.cancel();
 		}
 	}
 
 	pause(): void {
-		if (this._synth && this._synth.speaking) {
+		if (this._synth?.speaking) {
 			this._synth.pause();
 		}
 	}
 
 	resume(): void {
-		if (this._synth && this._synth.paused) {
+		if (this._synth?.paused) {
 			this._synth.resume();
 		}
 	}

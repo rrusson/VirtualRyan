@@ -1,9 +1,11 @@
-﻿namespace VirtualRyan.Server.Services
+﻿using System.Text.Encodings.Web;
+
+namespace VirtualRyan.Server.Services
 {
     public static class TextSanitizer
     {
         /// <summary>
-        /// Sanitizes a string for safe logging, etc. by removing control characters, especially newlines.
+        /// Sanitizes a string for safe logging by removing control characters and encoding special characters.
         /// </summary>
         public static string Sanitize(string input)
         {
@@ -13,7 +15,10 @@
             }
 
             // Remove carriage return, linefeeds, tab characters, and other control characters
-            return string.Concat(input.Where(c => !char.IsControl(c)));
+            var withoutControlChars = string.Concat(input.Where(c => !char.IsControl(c)));
+
+            // Encode to reduce log forging / display-layer injection risks in downstream log viewers
+            return JavaScriptEncoder.Default.Encode(withoutControlChars);
         }
 
     }

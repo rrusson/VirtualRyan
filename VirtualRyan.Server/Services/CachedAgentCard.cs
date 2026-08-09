@@ -7,17 +7,11 @@ namespace VirtualRyan.Server.Services
 		/// <summary>
 		/// Cache entry for an AgentCard with expiration time
 		/// </summary>
-		private sealed class CachedAgentCard
+		private sealed class CachedAgentCard(AgentCard agentCard, DateTime expirationTime)
 		{
-			public AgentCard AgentCard { get; }
+			public AgentCard AgentCard { get; } = agentCard;
 
-			public DateTime ExpirationTime { get; }
-
-			public CachedAgentCard(AgentCard agentCard, DateTime expirationTime)
-			{
-				AgentCard = agentCard;
-				ExpirationTime = expirationTime;
-			}
+			public DateTime ExpirationTime { get; } = expirationTime;
 
 			public bool IsExpired() => DateTime.UtcNow > ExpirationTime;
 		}

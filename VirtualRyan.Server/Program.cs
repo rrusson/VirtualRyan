@@ -23,7 +23,9 @@ namespace VirtualRyan.Server
 			// Add services to the container
 			builder.Services.AddControllers();
 			builder.Services.AddOpenApi();
+			builder.Services.AddMemoryCache();
 			builder.Services.AddSingleton<RateLimitingService>();
+			builder.Services.AddSingleton<ConversationHistoryService>();
 			builder.Services.AddHttpContextAccessor();
 
 			// Build the AgentCard from configuration for A2A registration

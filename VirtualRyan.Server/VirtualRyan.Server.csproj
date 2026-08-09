@@ -9,6 +9,7 @@
     <SpaProxyServerUrl>https://localhost:62370</SpaProxyServerUrl>
     <!-- Set ASPNETCORE_ENVIRONMENT to Production for Release builds -->
     <EnvironmentName Condition=" '$(Configuration)' == 'Release' ">Production</EnvironmentName>
+    <UserSecretsId>4c7b736f-9a29-4b9d-8104-a393610aa29d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +19,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
       <Version>10.0.6</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
   </ItemGroup>
 
   <ItemGroup>
