@@ -1,6 +1,3 @@
-using System.Collections.Concurrent;
-using System.Net;
-
 using A2A;
 
 using ChatBotLibrary;
@@ -10,31 +7,18 @@ namespace VirtualRyan.Server.Services
 	/// <summary>
 	/// Service for handling A2A (Application-to-Application) communication with VirtualRyan
 	/// </summary>
-	public partial class A2AService : IAgentHandler
+	public class A2AService : IAgentHandler
 	{
-		private const string _unknown = "unknown";
 		private const string _jsonContentType = "application/json";
-        private const string _textPlain = "text/plain";
+		private const string _textPlain = "text/plain";
 
-        private readonly ILogger<A2AService> _logger;
+		private readonly ILogger<A2AService> _logger;
 		private readonly IConfiguration _configuration;
-		private readonly IHttpContextAccessor _httpContextAccessor;
-		private readonly RateLimitingService _rateLimitingService;
 
-		// Cache for storing AgentCard information by hostname
-		private readonly ConcurrentDictionary<string, CachedAgentCard> _agentCardCache = new();
-		private readonly TimeSpan _cacheExpirationTime = TimeSpan.FromMinutes(5);
-
-		public A2AService(
-			ILogger<A2AService> logger,
-			IConfiguration configuration,
-			IHttpContextAccessor httpContextAccessor,
-			RateLimitingService rateLimitingService)
+		public A2AService(ILogger<A2AService> logger, IConfiguration configuration)
 		{
 			_logger = logger;
 			_configuration = configuration;
-			_httpContextAccessor = httpContextAccessor;
-			_rateLimitingService = rateLimitingService;
 		}
 
 		/// <summary>
@@ -54,45 +38,39 @@ namespace VirtualRyan.Server.Services
 				return;
 			}
 
-			var callingAgent = await GetCallerAgentCardAsync(cancellationToken).ConfigureAwait(false);
-			string caller = callingAgent?.Name ?? _unknown;
-
-			// Get the system prompt and enhance it for A2A context
 			string baseSystemPrompt = _configuration["SystemPrompt"] ?? string.Empty;
 			string a2aSystemPrompt = $"""
 				{baseSystemPrompt}
-				NOTE: This request is from another AI agent ({caller}) in an A2A (Agent-to-Agent) context. Provide a clear, direct response suitable for agent-to-agent communication.
+				NOTE: This request is from another AI agent in an A2A (Agent-to-Agent) context. Provide a clear, direct response suitable for agent-to-agent communication.
 				""";
 
 			try
 			{
-				var chatClient = new RyanChat(a2aSystemPrompt);
+				var llmConfig = new LlmConfig
+				{
+					LlmEndpoint = _configuration["Llm:Endpoint"],
+					LlmModel = _configuration["Llm:Model"],
+					LlmApiKey = _configuration["Llm:ApiKey"]
+				};
+				var chatClient = new RyanChat(a2aSystemPrompt, llmConfig);
 				string response = await chatClient.AskQuestionAsync(question, cancellationToken).ConfigureAwait(false);
 				_logger.LogInformation("A2A: INTERACTION\r\nQ: {Question} \r\nA: {Response}", question, response);
 
 				await responder.ReplyAsync(response, cancellationToken).ConfigureAwait(false);
 			}
-			catch (OperationCanceledException)
+			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 			{
 				_logger.LogInformation("A2A: Request cancelled for context {ContextId}", context.ContextId);
+				throw;
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "A2A: Error processing task from {Caller}: {Question}", caller, question);
-				await responder.ReplyAsync("Error processing request", cancellationToken).ConfigureAwait(false);
+				_logger.LogError(ex, "A2A: Error processing task for context {ContextId}", context.ContextId);
+				var updater = new TaskUpdater(eventQueue, context.TaskId, context.ContextId);
+				// The SDK requires an initial task event before a failure status can be projected.
+				await updater.SubmitAsync(cancellationToken).ConfigureAwait(false);
+				await updater.FailAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 			}
-		}
-
-		/// <summary>
-		/// Handles cancellation of an in-flight A2A request
-		/// </summary>
-		/// <param name="context">The request context for the task being cancelled</param>
-		/// <param name="eventQueue">The event queue</param>
-		/// <param name="cancellationToken"></param>
-		public Task CancelAsync(RequestContext context, AgentEventQueue eventQueue, CancellationToken cancellationToken)
-		{
-			_logger.LogInformation("A2A: Task cancelled for context {ContextId}", context.ContextId);
-			return Task.CompletedTask;
 		}
 
 		/// <summary>
@@ -150,7 +128,7 @@ namespace VirtualRyan.Server.Services
 						ProtocolBinding = ProtocolBindingNames.HttpJson
 					}
 				],
-				Capabilities = new AgentCapabilities { Streaming = false, PushNotifications = false }
+				Capabilities = new AgentCapabilities { Streaming = true, PushNotifications = false }
 			};
 		}
 
@@ -210,99 +188,8 @@ namespace VirtualRyan.Server.Services
 						ProtocolBinding = ProtocolBindingNames.HttpJson
 					}
 				],
-				Capabilities = new AgentCapabilities { Streaming = false, PushNotifications = false }
+				Capabilities = new AgentCapabilities { Streaming = true, PushNotifications = false }
 			};
-		}
-
-		/// <summary>
-		/// Attempts to resolve the caller's agent card from the HTTP context host information
-		/// </summary>
-		/// <param name="cancellationToken"></param>
-		/// <returns>The requestor's AgentCard (null if not found or an error occurred)</returns>
-		private async Task<AgentCard?> GetCallerAgentCardAsync(CancellationToken cancellationToken)
-		{
-			try
-			{
-				var httpContext = _httpContextAccessor.HttpContext;
-				string remoteIp = httpContext?.Connection.RemoteIpAddress?.ToString() ?? _unknown;
-				string scheme = httpContext?.Request?.Scheme ?? "https";
-				string host = httpContext?.Request?.Host.Value ?? _unknown;
-
-				if (host == _unknown || IsLocalRequest(httpContext) || host.StartsWith("localhost"))
-				{
-					//No local requests; infinite loops are not fun
-					return null;
-				}
-
-				AgentCard requesterCard = await GetAgentCard($"{scheme}://{host}", cancellationToken).ConfigureAwait(false);
-
-				var rateLimitInformation = _rateLimitingService.GetRateLimitInfo(remoteIp);
-				LogAgentRequest(requesterCard, remoteIp, host, rateLimitInformation);
-
-				return requesterCard;
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Trying to get A2A caller info went sideways.");
-				return null;
-			}
-		}
-
-		/// <summary>
-		/// Gets the AgentCard for a given host, using a cached version if available
-		/// </summary>
-		/// <param name="hostUri">host to attempt to fetch AgentCard from</param>
-		/// <param name="cancellationToken"></param>
-		/// <returns>AgentCard for the host</returns>
-		private async Task<AgentCard> GetAgentCard(string hostUri, CancellationToken cancellationToken)
-		{
-			string sanitizedHostUri = TextSanitizer.Sanitize(hostUri);
-			if (_agentCardCache.TryGetValue(hostUri, out var cachedCard) && !cachedCard.IsExpired())
-			{
-				_logger.LogDebug("A2A: Using cached agent card for host: {Host}", sanitizedHostUri);
-				return cachedCard.AgentCard;
-			}
-
-			// Not in cache or expired, fetch
-			_logger.LogDebug("A2A: Fetching agent card for host: {Host}", sanitizedHostUri);
-			var resolver = new A2ACardResolver(new Uri(hostUri));
-			AgentCard requesterCard = await resolver.GetAgentCardAsync(cancellationToken).ConfigureAwait(false);
-			requesterCard.Name ??= _unknown;
-			requesterCard.Description ??= "No description provided";
-
-			_agentCardCache[hostUri] = new CachedAgentCard(requesterCard, DateTime.UtcNow.Add(_cacheExpirationTime));
-			return requesterCard;
-		}
-
-		/// <summary>
-		/// Logs information about an agent request including rate limit details
-		/// </summary>
-		private void LogAgentRequest(AgentCard agentCard, string remoteIp, string host, RateLimitInfo rateLimitInfo)
-		{
-			_logger.LogInformation(
-				"A2A: Request from {Caller} ({Desc}) at {RemoteIp} ({Host})\r\nA2A: Rate limits: {PerMinuteRemaining}/{PerMinuteLimit} per minute, {PerDayRemaining}/{PerDayLimit} per day",
-				agentCard.Name,
-				agentCard.Description,
-				remoteIp,
-				host,
-				rateLimitInfo.PerMinuteRemaining,
-				rateLimitInfo.PerMinuteLimit,
-				rateLimitInfo.PerDayRemaining,
-				rateLimitInfo.PerDayLimit
-			);
-		}
-
-		private static bool IsLocalRequest(HttpContext? context)
-		{
-			var remoteIp = context?.Connection.RemoteIpAddress;
-			var localIp = context?.Connection.LocalIpAddress;
-
-			if (remoteIp == null)
-			{
-				return false;
-			}
-
-			return IPAddress.IsLoopback(remoteIp) || remoteIp.Equals(localIp);
 		}
 	}
 }

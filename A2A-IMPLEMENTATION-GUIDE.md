@@ -12,47 +12,45 @@ The A2A implementation allows other AI agents and bots to programmatically query
 
 ## Architecture
 ### Server Components (VirtualRyan.Server)
-- **A2AService**: Contains the core business logic for processing A2A requests using `MessageSendParams`, `Message`, and `TextPart` models for structured agent-to-agent messaging
+- **A2AService**: Processes incoming messages using the configured `Llm:Endpoint`, `Llm:Model`, and `Llm:ApiKey`, the same settings as the chat endpoint. Supply the API key through user secrets or an environment variable such as `Llm__ApiKey`.
+- The incoming HTTP Host identifies this server, not the calling agent. The service does not fetch caller cards or infer an authenticated caller identity from request headers. Caller identification would require a separately defined, authenticated trust mechanism.
+- An LLM failure is logged and returned as a failed A2A task. Request cancellation is propagated to the SDK.
+- The agent card advertises A2A 1.0 JSON-RPC at `/a2a` and HTTP+JSON under `/a2a`, including `/a2a/message:send`. Requests specifying other `A2A-Version` values are rejected; omitting the header uses 1.0.
+- Both bindings support SSE streaming. The answer is delivered as one complete message after the LLM finishes, not as incremental tokens.
+- The card is unsigned. Signatures are optional; signing requires a securely managed signing key and a distribution mechanism clients can use to verify it.
 
 ## Client Quick Start Example
-The following example demonstrates how to discover the agent, create a client, and send a message using the [A2A.Net library](https://github.com/a2aproject/a2a-dotnet):
+The following example uses [A2A.Net](https://github.com/a2aproject/a2a-dotnet) 1.0.0-preview2. For local testing, set `A2A:Agent:Url` to the server's local base URL so the discovered card advertises the local endpoint.
 
 ```csharp
 using A2A;
 
-// Discover agent and create client
 var cardResolver = new A2ACardResolver(new Uri("http://localhost:5074/"));
-var agentCard = await cardResolver.GetAgentCardAsync();
-var client = new A2AClient(new Uri(agentCard.Url));
+var agentCard = await cardResolver.GetAgentCardAsync().ConfigureAwait(false);
+var jsonRpc = agentCard.SupportedInterfaces.First(i => i.ProtocolBinding == ProtocolBindingNames.JsonRpc);
+using var httpClient = new HttpClient();
+var client = new A2AClient(new Uri(jsonRpc.Url), httpClient);
 
-// Send message
-var response = await client.SendMessageAsync(new MessageSendParams
+var response = await client.SendMessageAsync(new SendMessageRequest
 {
     Message = new Message
     {
-        Role = MessageRole.User,
-        Parts = [new TextPart { Text = "How long was the last job?" }]
+        Role = Role.User,
+        MessageId = Guid.NewGuid().ToString("N"),
+        Parts = [Part.FromText("How long was the last job?")]
     }
-});
+}).ConfigureAwait(false);
 ```
 
 ## Configuration
-### Client Configuration Options
-- **Agent:Name**: Name identifying your bot/agent
-- **Agent:Version**: Version of your agent
-- **Agent:Description**: Brief description of your agent's purpose
-- **IconUrl**: URL to an icon representing your agent
-- **Provider**: Name of the provider/organization
-- **ProviderUrl**: URL for the provider/organization
-- **DocumentationUrl**: URL for documentation
-- **MaxRequestsPerMinute**: Maximum requests allowed per minute
-- **MaxConcurrentRequests**: Maximum concurrent requests allowed
+Set `A2A:Agent:Url` to the externally reachable base URL. The `MaxRequestsPerMinute` and `MaxRequestsPerDay` settings limit requests per client IP. Configure `Llm:Endpoint` and `Llm:Model` for the provider, and store any required `Llm:ApiKey` outside the configuration file.
 
 ### A2A Server Configuration (in appsettings.json)
 ```json
 {
   "A2A": {
     "Agent": {
+      "Url": "https://ai.rrusson.com",
       "Name": "VirtualRyan",
       "Version": "1.0.0",
       "Description": "Bot-to-bot access to Ryan Russon's professional information.",
@@ -62,11 +60,6 @@ var response = await client.SendMessageAsync(new MessageSendParams
       "DocumentationUrl": "https://github.com/rrusson/VirtualRyan/blob/main/A2A-IMPLEMENTATION-GUIDE.md",
       "MaxRequestsPerMinute": 30,
       "MaxRequestsPerDay": 100
-    },
-    "Features": {
-      "EnableDetailedLogging": true,
-      "EnableMetrics": true,
-      "EnableCaching": false
     }
   }
 }
