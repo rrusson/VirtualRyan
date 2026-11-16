@@ -1,5 +1,4 @@
-using System.Text.Json;
-
+using A2A;
 using A2A.AspNetCore;
 
 using VirtualRyan.Server.Logging;
@@ -26,7 +25,6 @@ namespace VirtualRyan.Server
 			builder.Services.AddMemoryCache();
 			builder.Services.AddSingleton<RateLimitingService>();
 			builder.Services.AddSingleton<ConversationHistoryService>();
-			builder.Services.AddHttpContextAccessor();
 
 			// Build the AgentCard from configuration for A2A registration
 			var agentCard = A2AService.BuildAgentCard(builder.Configuration);
@@ -62,18 +60,31 @@ namespace VirtualRyan.Server
 			app.UseCors();
 			app.UseRateLimiting();
 
-			// A2A setup - MapA2A only handles POST (JSON-RPC); add explicit GET for agent card discovery.
-			// CamelCase serialization is required since pydantic (Python A2A tester) validates camelCase field names.
-			// Top-level "url" field is injected for A2A v0.3 client compatibility.
-			var camelCaseOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-			app.MapGet("/a2a", () =>
+			// The SDK preflight also accepts 0.3, but this server only implements 1.0.
+			app.Use(async (context, next) =>
 			{
-				var cardNode = JsonSerializer.SerializeToNode(agentCard, camelCaseOptions)!.AsObject();
-				cardNode["url"] = agentCard.SupportedInterfaces.FirstOrDefault()?.Url;
-				return Results.Json(cardNode);
-			}).RequireCors("A2APolicy");
+				if (context.Request.Path.StartsWithSegments("/a2a")
+					&& context.Request.Headers.TryGetValue("A2A-Version", out var versions)
+					&& (versions.Count != 1 || (!string.IsNullOrEmpty(versions[0]) && versions[0] != "1.0")))
+				{
+					const string message = "Protocol version is not supported. Supported versions: 1.0";
+					IResult result = HttpMethods.IsPost(context.Request.Method)
+						&& string.Equals(context.Request.Path.Value?.TrimEnd('/'), "/a2a", StringComparison.OrdinalIgnoreCase)
+						? new JsonRpcResponseResult(JsonRpcResponse.CreateJsonRpcErrorResponse(
+							new JsonRpcId((string?)null), new A2AException(message, A2AErrorCode.VersionNotSupported)))
+						: Results.Problem(detail: message, statusCode: StatusCodes.Status400BadRequest);
+					await result.ExecuteAsync(context).ConfigureAwait(false);
+					return;
+				}
+
+				await next(context).ConfigureAwait(false);
+			});
+
+			app.MapGet("/a2a", () => Results.Json(agentCard, A2AJsonUtilities.DefaultOptions)).RequireCors("A2APolicy");
 			app.MapA2A("/a2a").RequireCors("A2APolicy");
-			app.MapWellKnownAgentCard(agentCard).RequireCors("A2APolicy");
+			app.MapHttpA2A(app.Services.GetRequiredService<IA2ARequestHandler>(), agentCard, "/a2a").RequireCors("A2APolicy");
+			app.MapMethods("/.well-known/agent-card.json", ["GET", "HEAD"],
+				() => Results.Json(agentCard, A2AJsonUtilities.DefaultOptions)).RequireCors("A2APolicy");
 
 			app.UseHttpsRedirection();
 			app.UseAuthorization();
